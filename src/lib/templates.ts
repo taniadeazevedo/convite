@@ -1,6 +1,6 @@
 export const BRAND = "Convite";
-export const PRICE_CENTS = 5900;
-export const PRICE_LABEL = "59 €";
+export const PRICE_CENTS = 2900;
+export const PRICE_LABEL = "29 €";
 export const MAX_PHOTOS = 6;
 export const GUEST_PHOTO_LIMIT = 30; // fotos que pueden subir los invitados por boda
 
