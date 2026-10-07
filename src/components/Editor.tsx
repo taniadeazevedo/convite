@@ -205,7 +205,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
               <div className="text-sm text-soft">Visitas a la invitación: {initial.visits}</div>
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
-              <input readOnly value={publicUrl} className="field flex-1 font-mono text-sm" onFocus={(e) => e.target.select()} />
+              <input readOnly value={publicUrl} className="field min-w-0 flex-1 basis-full font-mono text-sm sm:basis-0" onFocus={(e) => e.target.select()} />
               <button
                 className="btn px-4 py-2 text-sm"
                 onClick={async () => {
