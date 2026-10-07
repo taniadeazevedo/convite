@@ -12,6 +12,8 @@ function stripe() {
 export async function createCheckout(token: string, origin: string): Promise<string> {
   const session = await stripe().checkout.sessions.create({
     mode: "payment",
+    // Solo tarjeta: Apple Pay y Google Pay van incluidos en "card"
+    payment_method_types: ["card"],
     client_reference_id: token,
     line_items: [
       {
