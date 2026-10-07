@@ -15,6 +15,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ slug: string; 
     headers: {
       "Content-Type": IMAGE_TYPES[file.split(".")[1]],
       "Cache-Control": "public, max-age=31536000, immutable",
+      "X-Content-Type-Options": "nosniff",
     },
   });
 }

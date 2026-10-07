@@ -33,3 +33,14 @@ export async function isSessionPaid(sessionId: string, token: string): Promise<b
   const session = await stripe().checkout.sessions.retrieve(sessionId);
   return session.client_reference_id === token && session.payment_status === "paid";
 }
+
+// Aviso que Stripe envía a /api/stripe/webhook cuando un pago se completa.
+// Devuelve el identificador de la invitación pagada, o null si el aviso no es válido o no es un pago.
+export function paidTokenFromWebhook(body: string, signature: string): string | null {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!stripeEnabled || !secret) return null;
+  const event = stripe().webhooks.constructEvent(body, signature, secret);
+  if (event.type !== "checkout.session.completed") return null;
+  const session = event.data.object;
+  return session.payment_status === "paid" ? session.client_reference_id : null;
+}

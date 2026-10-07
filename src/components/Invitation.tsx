@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import FitText from "./invitation/FitText";
 import { HEROES, Sparkle } from "./invitation/Heroes";
 import {
   BRAND,
@@ -66,7 +67,9 @@ function Countdown({ date, t }: { date: string; t: Template }) {
   if (!date || now === null) return <div className="h-20" />;
   const diff = new Date(date + "T12:00:00").getTime() - now;
   if (diff <= 0) {
-    return <p style={{ fontFamily: t.titleFont }} className="text-3xl">¡Hoy es el gran día!</p>;
+    // "hoy" dura hasta el final del día de la boda
+    const today = diff > -12 * 3600_000;
+    return <p style={{ fontFamily: t.titleFont }} className="text-3xl">{today ? "¡Hoy es el gran día!" : "¡Ya nos hemos casado!"}</p>;
   }
   const s = Math.floor(diff / 1000);
   const parts: [number, string][] = [
@@ -133,9 +136,9 @@ function Section({
           <p className={label} style={{ color: t.accent, fontFamily: t.labelFont }}>{eyebrow}</p>
           {!left && <Sparkle t={t} size={10} />}
         </div>
-        <h2 className={`mb-8 ${left ? "text-5xl" : "text-[2.6rem]"} leading-[1.05] ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
+        <FitText as="h2" wrap max={left ? 48 : 42} className={`mb-8 leading-[1.05] ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
           {title}
-        </h2>
+        </FitText>
         {children}
       </Reveal>
     </section>
@@ -509,7 +512,7 @@ export default function Invitation({ template, data, mode, slug, embedded }: Pro
         )}
 
         <footer className="px-6 py-12 text-center" style={{ borderTop: `1px solid ${t.line}` }}>
-          <p className={`text-4xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
+          <p className={`text-3xl [overflow-wrap:anywhere] ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
             {name1} <span style={{ color: t.accent }}>&</span> {name2}
           </p>
           <p className="mt-4 text-xs" style={{ color: t.muted }}>

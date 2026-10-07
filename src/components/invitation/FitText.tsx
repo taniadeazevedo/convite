@@ -2,14 +2,20 @@
 
 import { useLayoutEffect, useRef } from "react";
 
-// Título que nunca se sale: parte del tamaño máximo y lo reduce hasta que la línea más larga cabe.
+// Título que nunca se sale: parte del tamaño máximo y lo reduce hasta que cabe.
+// Por defecto va en una sola línea por nombre; con `wrap` puede partir entre palabras
+// y solo se reduce si una palabra suelta no cabe.
 export default function FitText({
   max,
+  as: Tag = "h1",
+  wrap = false,
   className = "",
   style,
   children,
 }: {
   max: number; // tamaño máximo en px
+  as?: "h1" | "h2";
+  wrap?: boolean;
   className?: string;
   style?: React.CSSProperties;
   children: React.ReactNode;
@@ -24,7 +30,8 @@ export default function FitText({
     const fit = () => {
       i.style.fontSize = `${max}px`;
       const available = o.clientWidth;
-      const needed = i.offsetWidth;
+      // con `wrap`, el ancho necesario es el de la palabra más larga
+      const needed = wrap ? o.scrollWidth : i.offsetWidth;
       if (needed > available && available > 0) {
         i.style.fontSize = `${Math.floor((max * available) / needed)}px`;
       }
@@ -35,13 +42,13 @@ export default function FitText({
     // las tipografías web cambian el ancho al terminar de cargar
     document.fonts?.ready.then(fit);
     return () => ro.disconnect();
-  }, [max, children]);
+  }, [max, wrap, children]);
 
   return (
-    <h1 ref={outer} className={`w-full ${className}`} style={style}>
-      <span ref={inner} className="inline-block whitespace-nowrap" style={{ fontSize: max }}>
+    <Tag ref={outer} className={`w-full ${className}`} style={style}>
+      <span ref={inner} className={wrap ? "block" : "inline-block whitespace-nowrap"} style={{ fontSize: max }}>
         {children}
       </span>
-    </h1>
+    </Tag>
   );
 }

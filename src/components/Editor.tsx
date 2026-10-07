@@ -341,8 +341,8 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
             )}
           </div>
         ) : (
-          <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
-            <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_400px]">
+            <div className="min-w-0 space-y-4">
               <section className="rounded-2xl border border-rule bg-card p-5">
                 <h2 className="font-serif text-2xl">Diseño</h2>
                 <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
@@ -384,13 +384,13 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
                 <Field label="Mensaje de bienvenida">
                   <textarea className="field" rows={3} maxLength={600} value={data.message} onChange={(e) => set("message", e.target.value)} />
                 </Field>
-                <Field label="Foto de portada" hint="JPG, PNG o WebP, hasta 6 MB.">
+                <Field label="Foto de portada" hint="JPG, PNG o WebP, hasta 12 MB.">
                   <div className="flex items-center gap-3">
                     {data.cover && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={data.cover} alt="" className="h-16 w-16 rounded-lg object-cover" />
                     )}
-                    <input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(e) => { upload(e.target.files, "cover"); e.target.value = ""; }} className="text-sm" />
+                    <input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(e) => { upload(e.target.files, "cover"); e.target.value = ""; }} className="max-w-full min-w-0 text-sm" />
                     {data.cover && (
                       <button type="button" onClick={() => removePhoto(data.cover)} className="text-sm text-soft underline">
                         Quitar
@@ -503,7 +503,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
                   ))}
                 </div>
                 {data.photos.length < MAX_PHOTOS ? (
-                  <input type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(e) => { upload(e.target.files, "gallery"); e.target.value = ""; }} className="text-sm" />
+                  <input type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(e) => { upload(e.target.files, "gallery"); e.target.value = ""; }} className="max-w-full min-w-0 text-sm" />
                 ) : (
                   <p className="text-sm text-soft">Máximo {MAX_PHOTOS} fotos.</p>
                 )}

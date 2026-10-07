@@ -51,7 +51,7 @@ export default function GuestUpload({ slug, initialLeft }: { slug: string; initi
         </p>
       )}
       {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
-      <p className="mt-4 text-xs text-soft">JPG, PNG o WebP, hasta 6 MB cada una. Solo las verán los novios.</p>
+      <p className="mt-4 text-xs text-soft">JPG, PNG o WebP, hasta 12 MB cada una. Solo las verán los novios.</p>
     </div>
   );
 }
