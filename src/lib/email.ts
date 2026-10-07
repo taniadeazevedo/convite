@@ -22,9 +22,9 @@ export async function sendEmail({ to, subject, text }: Mail): Promise<void> {
       if (!res.ok) console.error("No se pudo enviar el correo:", res.status, await res.text());
       return;
     }
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.mkdirSync(/*turbopackIgnore: true*/ DATA_DIR, { recursive: true });
     fs.appendFileSync(
-      path.join(DATA_DIR, "correos.log"),
+      path.join(/*turbopackIgnore: true*/ DATA_DIR, "correos.log"),
       `--- ${new Date().toISOString()}\nPara: ${to}\nAsunto: ${subject}\n\n${body}\n\n`,
     );
   } catch (e) {

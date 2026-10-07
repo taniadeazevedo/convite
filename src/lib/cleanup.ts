@@ -1,5 +1,3 @@
-import fs from "node:fs";
-import path from "node:path";
 import {
   deleteInvitationRows,
   deleteUserRows,
@@ -7,8 +5,8 @@ import {
   listByUser,
   listPaidBefore,
   markExpiryNotified,
-  UPLOADS_DIR,
 } from "./db";
+import { removeUpload } from "./storage";
 import { sendEmail } from "./email";
 import { BRAND } from "./templates";
 
@@ -16,7 +14,7 @@ const MONTH = 30 * 86400_000;
 
 // Borra una invitación entera: datos, confirmaciones y todas sus fotos
 export function removeInvitation(slug: string) {
-  if (/^[a-f0-9]{10}$/.test(slug)) fs.rmSync(path.join(UPLOADS_DIR, slug), { recursive: true, force: true });
+  if (/^[a-f0-9]{10}$/.test(slug)) void removeUpload([slug]).catch(() => {});
   deleteInvitationRows(slug);
 }
 

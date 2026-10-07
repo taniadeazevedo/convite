@@ -5,15 +5,15 @@ import path from "node:path";
 import { emptyData, type InvitationData, type TemplateId } from "./templates";
 
 // En el servidor, DATA_DIR apunta al disco permanente
-export const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), "data");
-export const UPLOADS_DIR = path.join(DATA_DIR, "uploads");
+export const DATA_DIR = process.env.DATA_DIR || path.join(/*turbopackIgnore: true*/ process.cwd(), "data");
+export const UPLOADS_DIR = path.join(/*turbopackIgnore: true*/ DATA_DIR, "uploads");
 
 let db: DatabaseSync | null = null;
 
 function getDb(): DatabaseSync {
   if (db) return db;
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-  db = new DatabaseSync(path.join(DATA_DIR, "app.db"));
+  fs.mkdirSync(/*turbopackIgnore: true*/ UPLOADS_DIR, { recursive: true });
+  db = new DatabaseSync(path.join(/*turbopackIgnore: true*/ DATA_DIR, "app.db"));
   db.exec(`
     CREATE TABLE IF NOT EXISTS invitations (
       slug TEXT PRIMARY KEY,

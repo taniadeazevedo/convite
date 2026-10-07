@@ -1,7 +1,6 @@
 import { randomBytes } from "node:crypto";
-import fs from "node:fs/promises";
-import path from "node:path";
-import { saveInvitation, UPLOADS_DIR } from "@/lib/db";
+import { saveInvitation } from "@/lib/db";
+import { removeUpload, writeUpload } from "@/lib/storage";
 import { IMAGE_NAME, MAX_IMAGE_BYTES, processImage } from "@/lib/images";
 import { MAX_PHOTOS } from "@/lib/templates";
 import { ownedInvitation } from "@/lib/auth";
@@ -31,15 +30,13 @@ export async function POST(req: Request, ctx: { params: Promise<{ token: string 
   if (!buf) return Response.json({ error: "Formato no admitido. Usa JPG, PNG o WebP." }, { status: 400 });
 
   const name = `${randomBytes(8).toString("hex")}.jpg`;
-  const dir = path.join(UPLOADS_DIR, inv.slug);
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(path.join(dir, name), buf);
+  await writeUpload([inv.slug, name], buf);
   const url = `/api/fotos/${inv.slug}/${name}`;
 
   const data = { ...inv.data };
   if (kind === "cover") {
     const old = fileFromUrl(inv.slug, data.cover);
-    if (old) await fs.rm(path.join(dir, old), { force: true });
+    if (old) await removeUpload([inv.slug, old]);
     data.cover = url;
   } else {
     data.photos = [...data.photos, url];
@@ -56,7 +53,7 @@ export async function DELETE(req: Request, ctx: { params: Promise<{ token: strin
   const name = fileFromUrl(inv.slug, body?.url);
   if (!name) return Response.json({ error: "Foto no válida" }, { status: 400 });
 
-  await fs.rm(path.join(UPLOADS_DIR, inv.slug, name), { force: true });
+  await removeUpload([inv.slug, name]);
   const data = {
     ...inv.data,
     cover: inv.data.cover === body.url ? "" : inv.data.cover,

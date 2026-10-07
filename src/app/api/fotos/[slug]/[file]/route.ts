@@ -1,6 +1,4 @@
-import fs from "node:fs/promises";
-import path from "node:path";
-import { UPLOADS_DIR } from "@/lib/db";
+import { readUpload } from "@/lib/storage";
 import { IMAGE_NAME, IMAGE_TYPES } from "@/lib/images";
 
 
@@ -9,7 +7,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ slug: string; 
   if (!/^[a-f0-9]{10}$/.test(slug) || !IMAGE_NAME.test(file)) {
     return new Response("No encontrada", { status: 404 });
   }
-  const buf = await fs.readFile(path.join(UPLOADS_DIR, slug, file)).catch(() => null);
+  const buf = await readUpload([slug, file]);
   if (!buf) return new Response("No encontrada", { status: 404 });
   return new Response(new Uint8Array(buf), {
     headers: {

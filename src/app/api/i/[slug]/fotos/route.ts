@@ -1,7 +1,6 @@
 import { randomBytes } from "node:crypto";
-import fs from "node:fs/promises";
-import path from "node:path";
-import { addGuestPhoto, getBySlug, listGuestPhotos, UPLOADS_DIR } from "@/lib/db";
+import { addGuestPhoto, getBySlug, listGuestPhotos } from "@/lib/db";
+import { writeUpload } from "@/lib/storage";
 import { MAX_IMAGE_BYTES, processImage } from "@/lib/images";
 import { GUEST_PHOTO_LIMIT } from "@/lib/templates";
 
@@ -24,9 +23,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ slug: string }
   if (!buf) return Response.json({ error: "Formato no admitido. Usa JPG, PNG o WebP." }, { status: 400 });
 
   const name = `${randomBytes(8).toString("hex")}.jpg`;
-  const dir = path.join(UPLOADS_DIR, slug, "invitados");
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(path.join(dir, name), buf);
+  await writeUpload([slug, "invitados", name], buf);
   addGuestPhoto(slug, name);
   return Response.json({ ok: true, left: GUEST_PHOTO_LIMIT - listGuestPhotos(slug).length });
 }
