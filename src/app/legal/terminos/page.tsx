@@ -8,8 +8,7 @@ export default function Page() {
   return (
     <LegalPage title="Términos y condiciones">
       <p>
-        Estas condiciones regulan la contratación del servicio {BRAND}, prestado por {LEGAL.owner} (NIF {LEGAL.nif}
-        ), con domicilio en {LEGAL.address}.
+        Estas condiciones regulan la contratación del servicio {BRAND}, prestado por {LEGAL.owner} (NIF {LEGAL.nif}).
       </p>
       <H>1. El servicio</H>
       <p>

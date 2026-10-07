@@ -9,7 +9,7 @@ export default function Page() {
     <LegalPage title="Política de privacidad">
       <H>Responsable</H>
       <p>
-        {LEGAL.owner}, NIF {LEGAL.nif}, {LEGAL.address}. Contacto: {LEGAL.email}.
+        {LEGAL.owner}, NIF {LEGAL.nif}. Contacto: {LEGAL.email}.
       </p>
       <H>Qué datos se tratan y para qué</H>
       <ul>

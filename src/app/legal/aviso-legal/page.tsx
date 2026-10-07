@@ -11,7 +11,6 @@ export default function Page() {
       <ul>
         <li>Titular: {LEGAL.owner}</li>
         <li>NIF: {LEGAL.nif}</li>
-        <li>Domicilio: {LEGAL.address}</li>
         <li>Contacto: {LEGAL.email}</li>
       </ul>
       <H>Objeto</H>
