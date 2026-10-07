@@ -197,31 +197,13 @@ export function emptyData(): InvitationData {
   };
 }
 
-// Fotos de ejemplo de Unsplash (licencia gratuita). Se sirven desde su CDN, no se copian.
-export const unsplash = (id: string, w = 900) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=70`;
-
-export const SAMPLE_PHOTOS = [
-  "photo-1606216794074-735e91aa2c92",
-  "photo-1546032996-6dfacbacbf3f",
-  "photo-1606490194859-07c18c9f0968",
-  "photo-1563808599481-34a342e44508",
-  "photo-1537633552985-df8429e8048b",
-  "photo-1607357910286-1ff94ac13c24",
-  "photo-1596457221755-b96bc3a6df18",
-  "photo-1544592732-83bbbfc46783",
-  "photo-1550784718-990c6de52adf",
-  "photo-1543932927-a9def13a0e7c",
-  "photo-1618566864264-fb013f791da4",
-  "photo-1561287495-a3fe1fd28504",
-  "photo-1606216836537-eea72a939072",
-  "photo-1550713450-94c9b4fc9f25",
-];
+// Fotos de ejemplo (de Unsplash, licencia gratuita), guardadas en public/muestras
+export const SAMPLE_PHOTOS = Array.from({ length: 14 }, (_, i) => `/muestras/${String(i + 1).padStart(2, "0")}.jpg`);
 
 export function sampleData(templateId?: string): InvitationData {
   // Cada plantilla enseña fotos distintas para que las miniaturas no se repitan
   const start = Math.max(0, TEMPLATES.findIndex((t) => t.id === templateId));
-  const pick = (i: number) => unsplash(SAMPLE_PHOTOS[(start + i) % SAMPLE_PHOTOS.length]);
+  const pick = (i: number) => SAMPLE_PHOTOS[(start + i) % SAMPLE_PHOTOS.length];
   const d = new Date();
   d.setMonth(d.getMonth() + 5);
   const date = d.toISOString().slice(0, 10);

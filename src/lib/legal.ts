@@ -1,9 +1,9 @@
-// Datos del titular que aparecen en los textos legales.
-// Rellénalos antes de publicar la web: mientras digan "PENDIENTE", los textos no son válidos.
+// Datos del titular que aparecen en los textos legales (/legal/*).
 export const LEGAL = {
-  owner: "[PENDIENTE: nombre y apellidos o razón social]",
-  nif: "[PENDIENTE: NIF/CIF]",
-  address: "[PENDIENTE: domicilio]",
-  email: "[PENDIENTE: correo de contacto]",
+  owner: "Tania de Azevedo Ribeiro",
+  nif: "72758997S",
+  // PENDIENTE: completar número, piso y código postal
+  address: "Hurtado de Amézaga, Bilbao",
+  email: "taniadeazevedoribeiro@gmail.com",
   updated: "octubre de 2026",
 };

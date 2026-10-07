@@ -4,7 +4,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { emptyData, type InvitationData, type TemplateId } from "./templates";
 
-export const DATA_DIR = path.join(process.cwd(), "data");
+// En el servidor, DATA_DIR apunta al disco permanente
+export const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), "data");
 export const UPLOADS_DIR = path.join(DATA_DIR, "uploads");
 
 let db: DatabaseSync | null = null;
@@ -48,15 +49,26 @@ function getDb(): DatabaseSync {
       terms_accepted_at TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS password_resets (
+      token_hash TEXT PRIMARY KEY,
+      user_id INTEGER NOT NULL,
+      expires_at TEXT NOT NULL
+    );
     CREATE TABLE IF NOT EXISTS sessions (
       id TEXT PRIMARY KEY,
       user_id INTEGER NOT NULL,
       expires_at TEXT NOT NULL
     );
   `);
-  // Bases de datos creadas antes de que existieran las cuentas
-  const cols = db.prepare("PRAGMA table_info(invitations)").all() as Row[];
-  if (!cols.some((c) => c.name === "user_id")) db.exec("ALTER TABLE invitations ADD COLUMN user_id INTEGER");
+  // Columnas añadidas después de la primera versión
+  const addColumn = (table: string, column: string, type: string) => {
+    const cols = db!.prepare(`PRAGMA table_info(${table})`).all() as Row[];
+    if (!cols.some((c) => c.name === column)) db!.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`);
+  };
+  addColumn("invitations", "user_id", "INTEGER");
+  addColumn("invitations", "paid_at", "TEXT");
+  addColumn("invitations", "expiry_notified", "INTEGER NOT NULL DEFAULT 0");
+  addColumn("rsvps", "reply_key", "TEXT");
   return db;
 }
 
@@ -123,15 +135,29 @@ export function saveInvitation(token: string, template: TemplateId, data: Invita
 }
 
 export function markPaid(token: string) {
-  getDb().prepare("UPDATE invitations SET paid = 1 WHERE token = ?").run(token);
+  getDb()
+    .prepare("UPDATE invitations SET paid = 1, paid_at = COALESCE(paid_at, ?) WHERE token = ?")
+    .run(new Date().toISOString(), token);
 }
 
-export function addRsvp(slug: string, r: Omit<Rsvp, "id" | "createdAt">) {
+// Guarda una respuesta. Si llega con la misma clave que una anterior (mismo invitado, mismo navegador),
+// la sustituye en vez de duplicarla. Devuelve true si es una respuesta nueva.
+export function saveRsvp(slug: string, key: string | null, r: Omit<Rsvp, "id" | "createdAt">): boolean {
+  const now = new Date().toISOString();
+  if (key) {
+    const done = getDb()
+      .prepare(
+        "UPDATE rsvps SET name = ?, attending = ?, guests = ?, allergies = ?, message = ?, created_at = ? WHERE slug = ? AND reply_key = ?",
+      )
+      .run(r.name, r.attending ? 1 : 0, r.guests, r.allergies, r.message, now, slug, key);
+    if (done.changes > 0) return false;
+  }
   getDb()
     .prepare(
-      "INSERT INTO rsvps (slug, name, attending, guests, allergies, message, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO rsvps (slug, name, attending, guests, allergies, message, created_at, reply_key) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     )
-    .run(slug, r.name, r.attending ? 1 : 0, r.guests, r.allergies, r.message, new Date().toISOString());
+    .run(slug, r.name, r.attending ? 1 : 0, r.guests, r.allergies, r.message, now, key);
+  return true;
 }
 
 export function listRsvps(slug: string): Rsvp[] {
@@ -216,4 +242,59 @@ export function getSessionUser(id: string): User | null {
 
 export function deleteSession(id: string) {
   getDb().prepare("DELETE FROM sessions WHERE id = ?").run(id);
+}
+
+export function getUserById(id: number): User | null {
+  const r = getDb().prepare("SELECT id, email FROM users WHERE id = ?").get(id) as Row | undefined;
+  return r ? { id: r.id as number, email: r.email as string } : null;
+}
+
+export function setPassword(userId: number, passwordHash: string) {
+  const d = getDb();
+  d.prepare("UPDATE users SET password = ? WHERE id = ?").run(passwordHash, userId);
+  // cambiar la contraseña cierra todas las sesiones abiertas
+  d.prepare("DELETE FROM sessions WHERE user_id = ?").run(userId);
+  d.prepare("DELETE FROM password_resets WHERE user_id = ?").run(userId);
+}
+
+export function createReset(tokenHash: string, userId: number, expiresAt: string) {
+  getDb().prepare("INSERT INTO password_resets (token_hash, user_id, expires_at) VALUES (?, ?, ?)").run(tokenHash, userId, expiresAt);
+}
+
+export function getResetUser(tokenHash: string): number | null {
+  const r = getDb()
+    .prepare("SELECT user_id FROM password_resets WHERE token_hash = ? AND expires_at > ?")
+    .get(tokenHash, new Date().toISOString()) as Row | undefined;
+  return r ? (r.user_id as number) : null;
+}
+
+export function countInvitations(): number {
+  return (getDb().prepare("SELECT COUNT(*) AS n FROM invitations").get() as Row).n as number;
+}
+
+// Borra las filas de una invitación (las fotos en disco las borra lib/cleanup.ts)
+export function deleteInvitationRows(slug: string) {
+  const d = getDb();
+  d.prepare("DELETE FROM rsvps WHERE slug = ?").run(slug);
+  d.prepare("DELETE FROM guest_photos WHERE slug = ?").run(slug);
+  d.prepare("DELETE FROM invitations WHERE slug = ?").run(slug);
+}
+
+export function deleteUserRows(userId: number) {
+  const d = getDb();
+  d.prepare("DELETE FROM sessions WHERE user_id = ?").run(userId);
+  d.prepare("DELETE FROM password_resets WHERE user_id = ?").run(userId);
+  d.prepare("DELETE FROM users WHERE id = ?").run(userId);
+}
+
+// Invitaciones publicadas antes de una fecha (para el aviso y el borrado a los 12 meses)
+export function listPaidBefore(iso: string, onlyNotNotified: boolean): Invitation[] {
+  const rows = getDb()
+    .prepare(`SELECT * FROM invitations WHERE paid = 1 AND paid_at < ?${onlyNotNotified ? " AND expiry_notified = 0" : ""}`)
+    .all(iso) as Row[];
+  return rows.map(toInvitation);
+}
+
+export function markExpiryNotified(slug: string) {
+  getDb().prepare("UPDATE invitations SET expiry_notified = 1 WHERE slug = ?").run(slug);
 }

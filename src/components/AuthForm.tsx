@@ -48,7 +48,11 @@ export default function AuthForm({ mode, next }: { mode: "registro" | "entrar"; 
           autoComplete={register ? "new-password" : "current-password"}
           className="field"
         />
-        {register && <span className="mt-1 block text-xs text-soft">Mínimo 8 caracteres.</span>}
+        {register ? (
+          <span className="mt-1 block text-xs text-soft">Mínimo 8 caracteres.</span>
+        ) : (
+          <Link href="/recuperar" className="mt-1 block text-xs text-soft underline">He olvidado mi contraseña</Link>
+        )}
       </label>
       {register && (
         <label className="flex items-start gap-2 text-sm">

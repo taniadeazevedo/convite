@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { DeleteAccount, DeleteInvitationButton } from "@/components/AccountActions";
 import LogoutButton from "@/components/LogoutButton";
 import { currentUser } from "@/lib/auth";
+import { dailyCleanup } from "@/lib/cleanup";
 import { countRsvps, listByUser } from "@/lib/db";
 import { BRAND, formatDate, getTemplate } from "@/lib/templates";
 
@@ -10,6 +12,7 @@ export const metadata = { title: `Mi cuenta · ${BRAND}`, robots: { index: false
 export default async function Cuenta() {
   const user = await currentUser();
   if (!user) redirect("/entrar?next=/cuenta");
+  dailyCleanup();
   const invitations = listByUser(user.id);
   return (
     <main className="mx-auto max-w-3xl px-6 py-8">
@@ -41,11 +44,17 @@ export default async function Cuenta() {
                   {inv.paid ? `Publicada · ${countRsvps(inv.slug)} respuestas · ${inv.visits} visitas` : "Borrador"}
                 </div>
               </div>
-              <Link href={`/panel/${inv.token}`} className="btn-ghost px-4 py-2 text-sm">Abrir panel</Link>
+              <div className="flex items-center gap-4">
+                <DeleteInvitationButton token={inv.token} names={`${inv.data.name1 || "sin nombres"} y ${inv.data.name2 || "…"}`} />
+                <Link href={`/panel/${inv.token}`} className="btn-ghost px-4 py-2 text-sm">Abrir panel</Link>
+              </div>
             </li>
           ))}
         </ul>
       )}
+      <div className="mt-16 border-t border-rule pt-6">
+        <DeleteAccount />
+      </div>
     </main>
   );
 }

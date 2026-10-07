@@ -1,5 +1,7 @@
 import { hashPassword, startSession, tooManyAttempts } from "@/lib/auth";
 import { createUser } from "@/lib/db";
+import { sendEmail, siteOrigin } from "@/lib/email";
+import { BRAND } from "@/lib/templates";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
@@ -20,5 +22,10 @@ export async function POST(req: Request) {
   const user = createUser(email, hashPassword(password));
   if (!user) return Response.json({ error: "Ya existe una cuenta con ese correo. Entra con ella." }, { status: 409 });
   await startSession(user.id);
+  void sendEmail({
+    to: user.email,
+    subject: `Bienvenidos a ${BRAND}`,
+    text: `Hola:\n\nVuestra cuenta ya está creada. Desde aquí podéis crear y editar la invitación, y ver quién ha confirmado:\n\n${siteOrigin(req)}/cuenta\n\nCrear y editar es gratis; solo se paga al publicarla.`,
+  });
   return Response.json({ ok: true });
 }

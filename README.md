@@ -24,9 +24,19 @@ Cada pareja se registra con correo y contraseña (`/registro`, `/entrar`) y ve s
 
 ## Antes de publicar la web
 
-- Rellenar los datos del titular en `src/lib/legal.ts` (aparecen en `/legal/*`) y hacer revisar los textos legales.
+- Completar el domicilio en `src/lib/legal.ts` y hacer revisar los textos legales (`/legal/*`).
 - Añadir opiniones reales en `src/lib/reviews.ts` (la sección no se muestra mientras esté vacía).
-- Configurar `STRIPE_SECRET_KEY` y `SITE_URL`.
+- Configurar las variables de `.env.example` (Stripe, Resend, `SITE_URL`, `DATA_DIR`).
+
+## Publicar en internet (Railway)
+
+La web guarda los datos en un archivo SQLite y las fotos en disco, así que necesita un alojamiento con disco permanente.
+
+1. En railway.com: New Project → Deploy from GitHub repo → este repositorio.
+2. En el servicio: Settings → Volumes → añadir un volumen montado en `/data`.
+3. Variables: `DATA_DIR=/data`, `SITE_URL=https://tu-dominio`, y las de Stripe y Resend de `.env.example`.
+4. Settings → Networking → Generate Domain (o conectar tu dominio).
+5. En Stripe: Developers → Webhooks → añadir `https://tu-dominio/api/stripe/webhook` con el evento `checkout.session.completed`, y copiar su secreto a `STRIPE_WEBHOOK_SECRET`.
 
 ## Dónde tocar
 

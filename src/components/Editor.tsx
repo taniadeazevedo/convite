@@ -68,6 +68,8 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
   const [uploading, setUploading] = useState(false);
   const [paying, setPaying] = useState(false);
   const [accepted, setAccepted] = useState(false);
+  // En pantallas pequeñas se alterna entre el formulario y la vista previa
+  const [mobilePreview, setMobilePreview] = useState(false);
   const [copied, setCopied] = useState(false);
   const first = useRef(true);
   const api = `/api/panel/${initial.token}`;
@@ -195,7 +197,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-4 py-6">
+      <div className="mx-auto max-w-7xl px-4 pt-6 pb-24 lg:pb-6">
         {initial.paid ? (
           <div className="mb-6 rounded-2xl border border-rule bg-card p-5">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -342,7 +344,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_400px]">
-            <div className="min-w-0 space-y-4">
+            <div className={`min-w-0 space-y-4 ${mobilePreview ? "hidden lg:block" : ""}`}>
               <section className="rounded-2xl border border-rule bg-card p-5">
                 <h2 className="font-serif text-2xl">Diseño</h2>
                 <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
@@ -577,10 +579,10 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
               </p>
             </div>
 
-            <aside className="hidden lg:block">
+            <aside className={mobilePreview ? "" : "hidden lg:block"}>
               <div className="sticky top-24">
                 <div className="mb-2 text-center text-xs uppercase tracking-wider text-soft">Así la verán en el móvil</div>
-                <div className="h-[calc(100svh-9rem)] overflow-y-auto rounded-[2rem] border-8 border-ink bg-white">
+                <div className="mx-auto h-[calc(100svh-11rem)] max-w-[400px] overflow-y-auto rounded-[2rem] border-8 border-ink bg-white lg:h-[calc(100svh-9rem)]">
                   <Invitation template={template} data={data} mode="preview" embedded />
                 </div>
               </div>
@@ -588,6 +590,18 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
           </div>
         )}
       </div>
+      {tab === "editar" && (
+        <button
+          type="button"
+          onClick={() => {
+            setMobilePreview((v) => !v);
+            window.scrollTo({ top: 0 });
+          }}
+          className="btn fixed bottom-4 left-1/2 z-30 -translate-x-1/2 shadow-xl lg:hidden"
+        >
+          {mobilePreview ? "← Seguir editando" : "Ver vista previa"}
+        </button>
+      )}
     </div>
   );
 }

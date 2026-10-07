@@ -240,6 +240,25 @@ function RsvpForm({ t, data, mode, slug }: { t: Template; data: InvitationData; 
   const [attending, setAttending] = useState(true);
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [error, setError] = useState("");
+  // Lo que este invitado respondió antes desde este mismo móvil
+  const [saved, setSaved] = useState<{ key: string; name: string; attending: boolean; guests: number } | null>(null);
+  const storageKey = `rsvp:${slug}`;
+
+  useEffect(() => {
+    if (mode !== "live") return;
+    const id = setTimeout(() => {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        if (raw) {
+          setSaved(JSON.parse(raw));
+          setState("done");
+        }
+      } catch {
+        // sin almacenamiento (modo privado): el formulario funciona igual
+      }
+    }, 0);
+    return () => clearTimeout(id);
+  }, [mode, storageKey]);
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -248,6 +267,8 @@ function RsvpForm({ t, data, mode, slug }: { t: Template; data: InvitationData; 
       return;
     }
     const f = new FormData(e.currentTarget);
+    const key = saved?.key ?? crypto.randomUUID();
+    const answer = { key, name: String(f.get("name") ?? ""), attending, guests: attending ? Number(f.get("guests") ?? 1) : 0 };
     setState("sending");
     const res = await fetch(`/api/i/${slug}/rsvp`, {
       method: "POST",
@@ -259,9 +280,16 @@ function RsvpForm({ t, data, mode, slug }: { t: Template; data: InvitationData; 
         allergies: f.get("allergies") ?? "",
         message: f.get("message") ?? "",
         web: f.get("web") ?? "",
+        key,
       }),
     }).catch(() => null);
     if (res?.ok) {
+      setSaved(answer);
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(answer));
+      } catch {
+        // sin almacenamiento: no se podrá cambiar la respuesta después, pero queda enviada
+      }
       setState("done");
     } else {
       const body = await res?.json().catch(() => null);
@@ -272,9 +300,19 @@ function RsvpForm({ t, data, mode, slug }: { t: Template; data: InvitationData; 
 
   if (state === "done") {
     return (
-      <p className="text-2xl" style={{ fontFamily: t.titleFont }}>
-        {mode === "live" ? "¡Gracias! Hemos recibido tu respuesta." : "Así verán tus invitados la confirmación enviada."}
-      </p>
+      <div>
+        <p className="text-2xl" style={{ fontFamily: t.titleFont }}>
+          {mode === "live" ? "¡Gracias! Hemos recibido tu respuesta." : "Así verán tus invitados la confirmación enviada."}
+        </p>
+        {saved && (
+          <p className="mt-3 text-sm" style={{ color: t.muted }}>
+            {saved.name}: {saved.attending ? `asistiré (${saved.guests})` : "no podré ir"}.{" "}
+            <button type="button" className="underline" onClick={() => setState("idle")}>
+              Cambiar mi respuesta
+            </button>
+          </p>
+        )}
+      </div>
     );
   }
 
@@ -289,7 +327,7 @@ function RsvpForm({ t, data, mode, slug }: { t: Template; data: InvitationData; 
 
   return (
     <form onSubmit={submit} className={`max-w-sm space-y-3 text-left ${t.align === "left" ? "" : "mx-auto"}`}>
-      <input name="name" required maxLength={80} placeholder="Nombre y apellidos" className="w-full px-4 py-3" style={input} />
+      <input name="name" required maxLength={80} defaultValue={saved?.name} placeholder="Nombre y apellidos" className="w-full px-4 py-3" style={input} />
       <div className="grid grid-cols-2 gap-2">
         <button type="button" onClick={() => setAttending(true)} className="py-3 font-semibold" style={pill(attending)}>
           Asistiré

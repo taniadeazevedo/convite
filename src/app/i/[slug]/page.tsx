@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Invitation from "@/components/Invitation";
+import { dailyCleanup } from "@/lib/cleanup";
 import { addVisit, getBySlug } from "@/lib/db";
 import { formatDate } from "@/lib/templates";
 
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page({ params }: Props) {
   const { slug } = await params;
+  dailyCleanup();
   const inv = getBySlug(slug);
   if (!inv) notFound();
   if (inv.paid) addVisit(slug);

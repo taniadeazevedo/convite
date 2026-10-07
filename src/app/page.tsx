@@ -2,10 +2,11 @@ import Link from "next/link";
 import TemplateCard from "@/components/TemplateCard";
 import TemplatePhone from "@/components/TemplatePhone";
 import { LEGAL_LINKS } from "@/components/LegalPage";
+import { countInvitations } from "@/lib/db";
 import { REVIEWS } from "@/lib/reviews";
-import { BRAND, PRICE_LABEL, SAMPLE_PHOTOS, TEMPLATES, unsplash } from "@/lib/templates";
+import { BRAND, PRICE_LABEL, SAMPLE_PHOTOS, TEMPLATES } from "@/lib/templates";
 
-const photo = (i: number, w = 900) => unsplash(SAMPLE_PHOTOS[i % SAMPLE_PHOTOS.length], w);
+const photo = (i: number) => SAMPLE_PHOTOS[i % SAMPLE_PHOTOS.length];
 
 const STEPS = [
   ["Elige un diseño", "Diez estilos distintos. Puedes cambiarlo cuando quieras sin perder nada."],
@@ -58,12 +59,19 @@ const FAQ = [
   ["¿Necesito una cuenta?", "Sí, con vuestro correo y una contraseña. Así la invitación queda guardada y podéis volver a entrar cuando queráis para editarla o ver quién ha confirmado."],
 ];
 
-function Img({ i, w, className }: { i: number; w?: number; className: string }) {
+function Img({ i, className }: { i: number; className: string }) {
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={photo(i, w)} alt="" loading="lazy" className={`object-cover ${className}`} />;
+  return <img src={photo(i)} alt="" loading="lazy" className={`object-cover ${className}`} />;
 }
 
+// La cifra de parejas se lee de la base de datos en cada visita
+export const dynamic = "force-dynamic";
+
+// A partir de cuántas invitaciones creadas se enseña la cifra
+const MIN_TO_SHOW = 25;
+
 export default function Home() {
+  const couples = countInvitations();
   return (
     <main className="overflow-x-clip">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
@@ -103,6 +111,21 @@ export default function Home() {
             </a>
           </div>
           <p className="mt-4 text-sm text-soft">Solo pagas al publicarla · {PRICE_LABEL} pago único</p>
+          {/* Cifra real: sale sola cuando haya suficientes invitaciones creadas */}
+          {couples >= MIN_TO_SHOW && (
+            <div className="mt-6 flex items-center justify-center gap-3 lg:justify-start">
+              <div className="flex -space-x-2">
+                {["#b0603f", "#7d8f73", "#c98b86", "#1d3b5c"].map((c) => (
+                  <span key={c} className="grid h-9 w-9 place-items-center rounded-full border-2 border-paper text-sm text-white" style={{ background: c }}>
+                    ♥
+                  </span>
+                ))}
+              </div>
+              <p className="text-sm">
+                <strong>{couples} parejas</strong> ya han creado su invitación con {BRAND}
+              </p>
+            </div>
+          )}
         </div>
         <div className="flex justify-center">
           <TemplatePhone template="terracota" className="mt-16 hidden -rotate-6 sm:block" />
@@ -119,7 +142,6 @@ export default function Home() {
               <Img
                 key={`${k}-${i}`}
                 i={i}
-                w={500}
                 className={`h-64 w-48 shrink-0 ${i % 3 === 0 ? "rounded-t-full" : i % 3 === 1 ? "rounded-2xl" : "rounded-[50%]"}`}
               />
             )),
@@ -242,7 +264,7 @@ export default function Home() {
 
       {/* Llamada final sobre foto */}
       <section className="relative mx-4 mb-10 overflow-hidden rounded-[2.5rem] sm:mx-8">
-        <Img i={5} w={1600} className="absolute inset-0 h-full w-full" />
+        <Img i={5} className="absolute inset-0 h-full w-full" />
         <div className="absolute inset-0 bg-black/45" />
         <div className="relative px-6 py-28 text-center text-white">
           <h2 className="mx-auto max-w-2xl font-serif text-6xl leading-none sm:text-7xl">
