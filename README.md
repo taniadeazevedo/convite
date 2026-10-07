@@ -1,4 +1,4 @@
-# Convite
+# Invitalia
 
 Invitaciones de boda digitales en autoservicio: la pareja elige una de las 5 plantillas, rellena sus datos, sube fotos y publica con un pago único.
 

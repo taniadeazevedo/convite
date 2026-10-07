@@ -1,4 +1,4 @@
-export const BRAND = "Convite";
+export const BRAND = "Invitalia";
 export const PRICE_CENTS = 2900;
 export const PRICE_LABEL = "29 €";
 export const MAX_PHOTOS = 6;
