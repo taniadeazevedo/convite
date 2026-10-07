@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #2a2522;
+  --soft: #766c64;
+  --paper: #fbf8f3;
+  --card: #ffffff;
+  --rule: #e9e1d6;
+  --brand: #b0603f;
+  --brand-dark: #934c30;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-soft: var(--soft);
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-rule: var(--rule);
+  --color-brand: var(--brand);
+  --color-brand-dark: var(--brand-dark);
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-cormorant);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+.field {
+  width: 100%;
+  border: 1px solid var(--rule);
+  border-radius: 0.6rem;
+  background: #fff;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.95rem;
+}
+
+.field:focus {
+  outline: 2px solid color-mix(in srgb, var(--brand) 45%, transparent);
+  outline-offset: 1px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.7rem 1.4rem;
+  transition: background 0.15s;
+}
+
+.btn:hover {
+  background: var(--brand-dark);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.3rem;
+}
+
+.btn-ghost:hover {
+  border-color: var(--brand);
+}
