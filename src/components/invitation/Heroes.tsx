@@ -1,3 +1,4 @@
+import FitText from "./FitText";
 import { formatDate, formatDateDots, type InvitationData, type Template } from "@/lib/templates";
 
 export type HeroProps = {
@@ -36,9 +37,6 @@ function Photo({ t, src, name1, name2, className }: { t: Template; src: string; 
 
 const label = "text-[11px] uppercase tracking-[0.4em]";
 
-// Tamaño de letra que hace caber el nombre más largo en el ancho de la portada (en % del contenedor)
-const fit = (chars: number, charWidth: number, max: number) =>
-  `${Math.min(max, 92 / (Math.max(chars, 3) * charWidth)).toFixed(1)}cqw`;
 const full = (p: HeroProps) => (p.embedded ? "" : "min-h-svh");
 
 function HeroArco(p: HeroProps) {
@@ -51,11 +49,11 @@ function HeroArco(p: HeroProps) {
           <Photo t={t} src={data.cover} name1={name1} name2={name2} className="h-full w-full" />
         </div>
       </div>
-      <h1 className={`text-6xl leading-[1.02] sm:text-7xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
+      <FitText max={68} className={`leading-[1.02] ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
         {name1}
         <span className="block text-3xl not-italic" style={{ color: t.accent }}>&</span>
         {name2}
-      </h1>
+      </FitText>
       <div className="flex items-center gap-3">
         <Sparkle t={t} size={12} />
         <p className="text-sm tracking-[0.3em]">{formatDateDots(data.date) || "fecha por confirmar"}</p>
@@ -83,7 +81,7 @@ function HeroPolaroid(p: HeroProps) {
           </p>
         </div>
       </div>
-      <h1 className="text-6xl leading-none sm:text-7xl" style={{ fontFamily: t.titleFont }}>
+      <h1 className="text-6xl leading-none break-words sm:text-7xl" style={{ fontFamily: t.titleFont }}>
         {name1} <span style={{ color: t.accent }}>+</span> {name2}
       </h1>
       {data.city && <p className={label} style={{ color: t.muted }}>{data.city}</p>}
@@ -104,7 +102,7 @@ function HeroBoho(p: HeroProps) {
         </div>
       </div>
       <div className="relative">
-        <h1 className={`text-5xl leading-tight sm:text-6xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
+        <h1 className={`max-w-full text-5xl leading-tight break-words sm:text-6xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
           {name1} <span style={{ color: t.accent }}>y</span> {name2}
         </h1>
         {/* arcoíris boho */}
@@ -124,19 +122,16 @@ function HeroRevista(p: HeroProps) {
   const { t, data, name1, name2 } = p;
   const [y, m, d] = data.date ? data.date.split("-") : ["", "", ""];
   return (
-    <header className={`@container flex flex-col px-6 py-8 ${full(p)}`}>
+    <header className={`flex flex-col px-6 py-8 ${full(p)}`}>
       <div className="flex justify-between pb-3 text-[10px] uppercase tracking-[0.3em]" style={{ borderBottom: `1px solid ${t.text}` }}>
         <span>La boda</span>
         <span>{data.city || "Edición única"}</span>
       </div>
-      <h1
-        className={`py-6 leading-[0.9] ${t.titleClass}`}
-        style={{ fontFamily: t.titleFont, fontSize: fit(Math.max(name1.length, name2.length + 2), 0.66, 22) }}
-      >
+      <FitText max={120} className={`py-6 leading-[0.9] ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
         {name1}
         <br />
         <span className="italic normal-case">&</span> {name2}
-      </h1>
+      </FitText>
       <Photo t={t} src={data.cover} name1={name1} name2={name2} className="aspect-[4/5] w-full grayscale" />
       <div className="mt-4 flex items-end justify-between pt-3" style={{ borderTop: `1px solid ${t.text}` }}>
         <p className="max-w-[9rem] text-[10px] uppercase leading-relaxed tracking-[0.3em]" style={{ color: t.muted }}>
@@ -161,14 +156,14 @@ function HeroGala(p: HeroProps) {
       <div className="absolute inset-0" style={{ background: t.bg, opacity: data.cover ? 0.68 : 1 }} />
       <div className="absolute inset-4" style={{ border: `1px solid ${t.accent}` }} />
       <div className="absolute inset-6" style={{ border: `1px solid ${t.accent}`, opacity: 0.4 }} />
-      <div className="relative flex flex-col items-center gap-7 px-8 py-20">
+      <div className="relative flex w-full flex-col items-center gap-7 px-8 py-20">
         <Sparkle t={t} size={22} />
         <p className={label} style={{ color: t.accent }}>Tenemos el honor de invitaros</p>
-        <h1 className={`text-4xl leading-snug sm:text-5xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
+        <FitText max={46} className={`leading-snug ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
           {name1}
           <span className="my-2 block text-2xl italic normal-case tracking-normal" style={{ color: t.accent }}>y</span>
           {name2}
-        </h1>
+        </FitText>
         <div className="h-px w-16" style={{ background: t.accent }} />
         <p className="text-sm tracking-[0.3em]">{formatDateDots(data.date) || "fecha por confirmar"}</p>
         {data.city && <p className={label} style={{ color: t.muted }}>{data.city}</p>}
@@ -197,7 +192,7 @@ function HeroCurva(p: HeroProps) {
       </div>
       <div className="flex flex-1 flex-col items-center justify-center gap-5 px-6 py-10">
         <p className={label} style={{ color: t.accent }}>{data.city || "nos casamos"}</p>
-        <h1 className={`text-5xl leading-tight sm:text-6xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
+        <h1 className={`max-w-full text-5xl leading-tight break-words sm:text-6xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
           {name1} <span className="italic" style={{ color: t.accent }}>&</span> {name2}
         </h1>
         <p className="text-lg">{formatDate(data.date) || "Fecha por confirmar"}</p>
@@ -212,7 +207,7 @@ function HeroOval(p: HeroProps) {
     <header className={`flex flex-col items-center justify-center gap-6 px-6 py-16 text-center ${full(p)}`}>
       <p className={label} style={{ color: t.muted }}>{formatDateDots(data.date) || "muy pronto"}</p>
       <h1 className="sr-only">{name1} y {name2}</h1>
-      <p className={`text-6xl leading-none sm:text-7xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }} aria-hidden>{name1}</p>
+      <p className={`max-w-full text-6xl leading-none break-words sm:text-7xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }} aria-hidden>{name1}</p>
       <div className="relative">
         <div className="rounded-[50%] p-2.5" style={{ border: `1px solid ${t.accent}` }}>
           <div className="h-80 w-60 overflow-hidden rounded-[50%]">
@@ -226,7 +221,7 @@ function HeroOval(p: HeroProps) {
           &
         </span>
       </div>
-      <p className={`text-6xl leading-none sm:text-7xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }} aria-hidden>
+      <p className={`max-w-full text-6xl leading-none break-words sm:text-7xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }} aria-hidden>
         {name2}
       </p>
       {data.city && <p className={label} style={{ color: t.muted }}>{data.city}</p>}
@@ -263,11 +258,11 @@ function HeroCollage(p: HeroProps) {
           <span className="text-[9px] uppercase tracking-widest" style={{ fontFamily: t.labelFont }}>el día</span>
         </div>
       </div>
-      <h1 className={`text-6xl leading-[0.95] sm:text-7xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
+      <FitText max={72} className={`leading-[0.95] ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
         {name1}
         <br />
         <span style={{ color: t.accent }}>&</span> {name2}
-      </h1>
+      </FitText>
     </header>
   );
 }
@@ -292,7 +287,7 @@ function HeroTicket(p: HeroProps) {
         </div>
         <Photo t={t} src={data.cover} name1={name1} name2={name2} className="h-56 w-full" />
         <div className="px-5 pt-5 pb-4 text-center">
-          <h1 className={`text-5xl leading-none ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
+          <h1 className={`text-5xl leading-none break-words ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
             {name1} <span className="italic" style={{ color: t.accent }}>&</span> {name2}
           </h1>
         </div>
@@ -316,20 +311,17 @@ function HeroTicket(p: HeroProps) {
 function HeroPop(p: HeroProps) {
   const { t, data, name1, name2 } = p;
   return (
-    <header className={`@container flex flex-col justify-center gap-6 overflow-hidden px-5 py-12 ${full(p)}`}>
+    <header className={`flex flex-col justify-center gap-6 overflow-hidden px-5 py-12 ${full(p)}`}>
       <div className="flex items-center justify-between text-xs font-bold uppercase">
         <span className="rounded-full px-3 py-1" style={{ background: t.text, color: t.bg }}>¡nos casamos!</span>
         <span>{formatDateDots(data.date).replace(/ · /g, "/") || "muy pronto"}</span>
       </div>
-      <h1
-        className={`leading-[0.84] ${t.titleClass}`}
-        style={{ fontFamily: t.titleFont, fontSize: fit(Math.max(name1.length, name2.length + 1), 1.0, 24) }}
-      >
+      <FitText max={150} className={`leading-[0.84] ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
         {name1}
         <br />
         <span style={{ color: t.accent }}>&</span>
         {name2}
-      </h1>
+      </FitText>
       <div className="relative">
         <Photo t={t} src={data.cover} name1={name1} name2={name2} className="aspect-[4/5] w-full rounded-[2.5rem]" />
         {/* pegatina giratoria */}

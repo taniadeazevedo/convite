@@ -1,9 +1,10 @@
 import { randomBytes } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { getByToken, saveInvitation, UPLOADS_DIR } from "@/lib/db";
+import { saveInvitation, UPLOADS_DIR } from "@/lib/db";
 import { detectImageType, IMAGE_NAME, MAX_IMAGE_BYTES } from "@/lib/images";
 import { MAX_PHOTOS } from "@/lib/templates";
+import { ownedInvitation } from "@/lib/auth";
 
 function fileFromUrl(slug: string, url: unknown): string | null {
   const prefix = `/api/fotos/${slug}/`;
@@ -14,7 +15,7 @@ function fileFromUrl(slug: string, url: unknown): string | null {
 
 export async function POST(req: Request, ctx: { params: Promise<{ token: string }> }) {
   const { token } = await ctx.params;
-  const inv = getByToken(token);
+  const inv = await ownedInvitation(token);
   if (!inv) return Response.json({ error: "No encontrada" }, { status: 404 });
 
   const form = await req.formData().catch(() => null);
@@ -50,7 +51,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ token: string 
 
 export async function DELETE(req: Request, ctx: { params: Promise<{ token: string }> }) {
   const { token } = await ctx.params;
-  const inv = getByToken(token);
+  const inv = await ownedInvitation(token);
   if (!inv) return Response.json({ error: "No encontrada" }, { status: 404 });
   const body = await req.json().catch(() => null);
   const name = fileFromUrl(inv.slug, body?.url);

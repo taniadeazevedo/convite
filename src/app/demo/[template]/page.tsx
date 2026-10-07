@@ -6,8 +6,18 @@ import { isTemplateId, sampleData } from "@/lib/templates";
 // La fecha de ejemplo se calcula respecto a hoy, así que no se genera de antemano
 export const dynamic = "force-dynamic";
 
-export default async function Demo({ params }: { params: Promise<{ template: string }> }) {
+type Props = {
+  params: Promise<{ template: string }>;
+  searchParams: Promise<{ n1?: string; n2?: string }>;
+};
+
+export default async function Demo({ params, searchParams }: Props) {
   const { template } = await params;
+  // ?n1=…&n2=… permite ver cómo queda el diseño con otros nombres
+  const { n1, n2 } = await searchParams;
+  const data = sampleData(template);
+  if (n1) data.name1 = n1.slice(0, 40);
+  if (n2) data.name2 = n2.slice(0, 40);
   if (!isTemplateId(template)) notFound();
   return (
     <>
@@ -20,7 +30,7 @@ export default async function Demo({ params }: { params: Promise<{ template: str
           Usar este diseño
         </Link>
       </div>
-      <Invitation template={template} data={sampleData(template)} mode="demo" />
+      <Invitation template={template} data={data} mode="demo" />
     </>
   );
 }

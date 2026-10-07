@@ -1,13 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { getByToken, removeGuestPhoto, UPLOADS_DIR } from "@/lib/db";
+import { removeGuestPhoto, UPLOADS_DIR } from "@/lib/db";
 import { IMAGE_NAME, IMAGE_TYPES } from "@/lib/images";
+import { ownedInvitation } from "@/lib/auth";
 
 type Ctx = { params: Promise<{ token: string; file: string }> };
 
 async function resolve(ctx: Ctx) {
   const { token, file } = await ctx.params;
-  const inv = getByToken(token);
+  const inv = await ownedInvitation(token);
   if (!inv || !IMAGE_NAME.test(file)) return null;
   return { slug: inv.slug, file, full: path.join(UPLOADS_DIR, inv.slug, "invitados", file) };
 }

@@ -1,9 +1,10 @@
-import { getByToken, saveInvitation } from "@/lib/db";
+import { saveInvitation } from "@/lib/db";
 import { isTemplateId, sanitizeData } from "@/lib/templates";
+import { ownedInvitation } from "@/lib/auth";
 
 export async function PUT(req: Request, ctx: { params: Promise<{ token: string }> }) {
   const { token } = await ctx.params;
-  const inv = getByToken(token);
+  const inv = await ownedInvitation(token);
   if (!inv) return Response.json({ error: "No encontrada" }, { status: 404 });
   const body = await req.json().catch(() => null);
   const template = isTemplateId(body?.template) ? body.template : inv.template;

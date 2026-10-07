@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Editor from "@/components/Editor";
-import { getByToken, listGuestPhotos, listRsvps, markPaid } from "@/lib/db";
+import { listGuestPhotos, listRsvps, markPaid } from "@/lib/db";
 import { demoPayments, isSessionPaid, stripeEnabled } from "@/lib/payments";
+import { currentUser, ownedInvitation } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Tu invitación · Panel", robots: { index: false } };
 
@@ -14,8 +15,9 @@ type Props = {
 
 export default async function Panel({ params, searchParams }: Props) {
   const { token } = await params;
+  if (!(await currentUser())) redirect(`/entrar?next=/panel/${token}`);
   const { session_id } = await searchParams;
-  let inv = getByToken(token);
+  let inv = await ownedInvitation(token);
   if (!inv) notFound();
 
   // Vuelta de Stripe: se comprueba el pago contra Stripe, no se confía en la URL

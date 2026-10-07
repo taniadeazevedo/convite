@@ -322,6 +322,10 @@ function RsvpForm({ t, data, mode, slug }: { t: Template; data: InvitationData; 
       >
         {state === "sending" ? "Enviando…" : "Enviar confirmación"}
       </button>
+      <p className="text-center text-xs" style={{ color: t.muted }}>
+        Tus datos solo los verán los novios, para organizar la boda.{" "}
+        <Link href="/legal/privacidad" className="underline">Privacidad</Link>
+      </p>
     </form>
   );
 }

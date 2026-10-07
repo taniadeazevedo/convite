@@ -1,4 +1,5 @@
-import { getByToken, listRsvps } from "@/lib/db";
+import { listRsvps } from "@/lib/db";
+import { ownedInvitation } from "@/lib/auth";
 
 // Comillas dobles escapadas, y apóstrofo delante de = + - @ para que Excel no lo trate como fórmula
 function cell(v: string | number): string {
@@ -9,7 +10,7 @@ function cell(v: string | number): string {
 
 export async function GET(_req: Request, ctx: { params: Promise<{ token: string }> }) {
   const { token } = await ctx.params;
-  const inv = getByToken(token);
+  const inv = await ownedInvitation(token);
   if (!inv) return new Response("No encontrada", { status: 404 });
 
   const rows = listRsvps(inv.slug).map((r) =>

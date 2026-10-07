@@ -41,7 +41,22 @@ function getDb(): DatabaseSync {
       created_at TEXT NOT NULL
     );
     CREATE INDEX IF NOT EXISTS rsvps_slug ON rsvps(slug);
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL UNIQUE,
+      password TEXT NOT NULL,
+      terms_accepted_at TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS sessions (
+      id TEXT PRIMARY KEY,
+      user_id INTEGER NOT NULL,
+      expires_at TEXT NOT NULL
+    );
   `);
+  // Bases de datos creadas antes de que existieran las cuentas
+  const cols = db.prepare("PRAGMA table_info(invitations)").all() as Row[];
+  if (!cols.some((c) => c.name === "user_id")) db.exec("ALTER TABLE invitations ADD COLUMN user_id INTEGER");
   return db;
 }
 
@@ -52,6 +67,7 @@ export type Invitation = {
   data: InvitationData;
   paid: boolean;
   visits: number;
+  userId: number | null;
   createdAt: string;
 };
 
@@ -75,18 +91,19 @@ function toInvitation(r: Row): Invitation {
     data: { ...emptyData(), ...JSON.parse(r.data as string) },
     paid: r.paid === 1,
     visits: r.visits as number,
+    userId: (r.user_id as number | null) ?? null,
     createdAt: r.created_at as string,
   };
 }
 
-export function createInvitation(template: TemplateId): Invitation {
+export function createInvitation(template: TemplateId, userId: number): Invitation {
   const slug = randomBytes(5).toString("hex");
   const token = randomBytes(24).toString("hex");
   const now = new Date().toISOString();
   getDb()
-    .prepare("INSERT INTO invitations (slug, token, template, data, created_at) VALUES (?, ?, ?, ?, ?)")
-    .run(slug, token, template, JSON.stringify(emptyData()), now);
-  return { slug, token, template, data: emptyData(), paid: false, visits: 0, createdAt: now };
+    .prepare("INSERT INTO invitations (slug, token, template, data, created_at, user_id) VALUES (?, ?, ?, ?, ?, ?)")
+    .run(slug, token, template, JSON.stringify(emptyData()), now, userId);
+  return { slug, token, template, data: emptyData(), paid: false, visits: 0, userId, createdAt: now };
 }
 
 export function getByToken(token: string): Invitation | null {
@@ -152,4 +169,51 @@ export function listGuestPhotos(slug: string): string[] {
 
 export function removeGuestPhoto(slug: string, file: string) {
   getDb().prepare("DELETE FROM guest_photos WHERE slug = ? AND file = ?").run(slug, file);
+}
+
+export function listByUser(userId: number): Invitation[] {
+  const rows = getDb().prepare("SELECT * FROM invitations WHERE user_id = ? ORDER BY created_at DESC").all(userId) as Row[];
+  return rows.map(toInvitation);
+}
+
+export function setOwner(token: string, userId: number) {
+  getDb().prepare("UPDATE invitations SET user_id = ? WHERE token = ? AND user_id IS NULL").run(userId, token);
+}
+
+// --- Cuentas y sesiones
+
+export type User = { id: number; email: string };
+
+export function createUser(email: string, passwordHash: string): User | null {
+  const now = new Date().toISOString();
+  try {
+    const r = getDb()
+      .prepare("INSERT INTO users (email, password, terms_accepted_at, created_at) VALUES (?, ?, ?, ?)")
+      .run(email, passwordHash, now, now);
+    return { id: Number(r.lastInsertRowid), email };
+  } catch {
+    return null; // el correo ya existe
+  }
+}
+
+export function getUserWithPassword(email: string): (User & { password: string }) | null {
+  const r = getDb().prepare("SELECT id, email, password FROM users WHERE email = ?").get(email) as Row | undefined;
+  return r ? { id: r.id as number, email: r.email as string, password: r.password as string } : null;
+}
+
+export function createSessionRow(id: string, userId: number, expiresAt: string) {
+  getDb().prepare("INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)").run(id, userId, expiresAt);
+}
+
+export function getSessionUser(id: string): User | null {
+  const r = getDb()
+    .prepare(
+      "SELECT u.id, u.email FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ? AND s.expires_at > ?",
+    )
+    .get(id, new Date().toISOString()) as Row | undefined;
+  return r ? { id: r.id as number, email: r.email as string } : null;
+}
+
+export function deleteSession(id: string) {
+  getDb().prepare("DELETE FROM sessions WHERE id = ?").run(id);
 }

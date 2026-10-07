@@ -1,6 +1,8 @@
 import Link from "next/link";
 import TemplateCard from "@/components/TemplateCard";
 import TemplatePhone from "@/components/TemplatePhone";
+import { LEGAL_LINKS } from "@/components/LegalPage";
+import { REVIEWS } from "@/lib/reviews";
 import { BRAND, PRICE_LABEL, SAMPLE_PHOTOS, TEMPLATES, unsplash } from "@/lib/templates";
 
 const photo = (i: number, w = 900) => unsplash(SAMPLE_PHOTOS[i % SAMPLE_PHOTOS.length], w);
@@ -27,7 +29,7 @@ const FEATURES = [
   {
     eyebrow: "Álbum con QR",
     title: "Las fotos de todos, en un solo sitio",
-    text: "Imprime el cartel con el código QR y ponlo en las mesas. Los invitados suben sus fotos de la boda y solo las veis vosotros.",
+    text: "Os generamos el cartel con el código QR, con el mismo diseño que vuestra invitación. Solo tenéis que imprimirlo y ponerlo en las mesas: los invitados suben sus fotos y solo las veis vosotros.",
     photo: 4,
   },
 ];
@@ -52,7 +54,8 @@ const FAQ = [
   ["¿Puedo cambiar cosas después de publicarla?", "Todas las veces que quieras, sin coste. Los cambios se ven al momento."],
   ["¿Mis invitados necesitan instalar algo?", "No. Abren un enlace en el móvil y listo."],
   ["¿Puedo quitar secciones que no necesito?", "Sí, cada sección tiene un interruptor. Si no hay autobuses o no queréis lista de regalos, se oculta."],
-  ["¿Es un pago único?", `Sí, ${PRICE_LABEL} una sola vez. Sin suscripción.`],
+  ["¿Cómo se paga?", `Con tarjeta, en una página segura de Stripe, justo cuando decidís publicarla. Son ${PRICE_LABEL} una sola vez, sin suscripción.`],
+  ["¿Necesito una cuenta?", "Sí, con vuestro correo y una contraseña. Así la invitación queda guardada y podéis volver a entrar cuando queráis para editarla o ver quién ha confirmado."],
 ];
 
 function Img({ i, w, className }: { i: number; w?: number; className: string }) {
@@ -70,9 +73,14 @@ export default function Home() {
           <a href="#como">Cómo funciona</a>
           <a href="#precio">Precio</a>
         </nav>
-        <Link href="/crear" className="btn text-sm">
-          Crear invitación
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/entrar" className="text-sm font-medium">
+            Entrar
+          </Link>
+          <Link href="/crear" className="btn text-sm">
+            Crear invitación
+          </Link>
+        </div>
       </header>
 
       {/* Portada */}
@@ -178,6 +186,24 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Opiniones: solo aparece cuando hay opiniones reales en src/lib/reviews.ts */}
+      {REVIEWS.length > 0 && (
+        <section className="mx-auto max-w-6xl px-6 py-16">
+          <h2 className="text-center font-serif text-5xl">Lo que dicen las parejas</h2>
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {REVIEWS.map((r) => (
+              <figure key={r.name} className="rounded-3xl border border-rule bg-card p-7">
+                <div className="text-brand">★★★★★</div>
+                <blockquote className="mt-3 font-serif text-2xl leading-snug">«{r.text}»</blockquote>
+                <figcaption className="mt-4 text-sm text-soft">
+                  {r.name} · {r.place}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Precio */}
       <section id="precio" className="mx-auto max-w-4xl px-6 py-20">
         <div className="grid gap-8 rounded-[2rem] border border-rule bg-card p-8 sm:grid-cols-[1fr_auto] sm:p-12">
@@ -229,6 +255,13 @@ export default function Home() {
       </section>
 
       <footer className="border-t border-rule px-6 py-8 text-center text-sm text-soft">
+        <nav className="mb-3 flex flex-wrap justify-center gap-x-5 gap-y-2">
+          {LEGAL_LINKS.map(([href, label]) => (
+            <Link key={href} href={href} className="underline">
+              {label}
+            </Link>
+          ))}
+        </nav>
         © {new Date().getFullYear()} {BRAND} · Fotos de ejemplo de Unsplash
       </footer>
     </main>

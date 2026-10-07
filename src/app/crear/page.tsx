@@ -1,9 +1,13 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import CreateButton from "@/components/CreateButton";
 import TemplateCard from "@/components/TemplateCard";
+import { currentUser } from "@/lib/auth";
 import { BRAND, TEMPLATES } from "@/lib/templates";
 
-export default function Crear() {
+export default async function Crear() {
+  // La invitación se guarda en una cuenta, así que primero hay que tener una
+  if (!(await currentUser())) redirect("/registro?next=/crear");
   return (
     <main className="mx-auto max-w-6xl px-6 py-8">
       <Link href="/" className="font-serif text-2xl italic">

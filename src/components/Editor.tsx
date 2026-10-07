@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Invitation from "./Invitation";
 import type { Invitation as Inv, Rsvp } from "@/lib/db";
@@ -66,6 +67,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
   const [saveState, setSaveState] = useState<"saved" | "saving" | "error">("saved");
   const [uploading, setUploading] = useState(false);
   const [paying, setPaying] = useState(false);
+  const [accepted, setAccepted] = useState(false);
   const [copied, setCopied] = useState(false);
   const first = useRef(true);
   const api = `/api/panel/${initial.token}`;
@@ -167,7 +169,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
     <div className="min-h-svh">
       <header className="sticky top-0 z-20 border-b border-rule bg-paper/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3">
-          <span className="font-serif text-2xl italic">{BRAND}</span>
+          <Link href="/cuenta" className="font-serif text-2xl italic" title="Mis invitaciones">{BRAND}</Link>
           <nav className="flex gap-1 rounded-full border border-rule bg-card p-1 text-sm">
             {(["editar", "confirmaciones", "album"] as const).map((id) => (
               <button
@@ -186,7 +188,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
             Ver
           </a>
           {!initial.paid && (
-            <button onClick={pay} disabled={paying} className="btn px-4 py-2 text-sm">
+            <button onClick={pay} disabled={paying || !accepted} className="btn px-4 py-2 text-sm" title={accepted ? undefined : "Marca la casilla de abajo para publicar"}>
               {paying ? "Un momento…" : `Publicar · ${PRICE_LABEL}`}
             </button>
           )}
@@ -224,10 +226,21 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
           </div>
         ) : (
           <div className="mb-6 rounded-2xl border border-rule bg-card p-5 text-sm">
-            <span className="font-semibold">Guarda esta página en favoritos:</span> es vuestro panel privado y la
-            única forma de volver a editar la invitación. No compartas este enlace con los invitados.
+            <div className="font-semibold">Borrador: podéis editarlo gratis todo el tiempo que queráis.</div>
+            <p className="mt-1 text-soft">
+              Al publicar se paga una sola vez ({PRICE_LABEL}) con tarjeta en una página segura de Stripe, y la
+              invitación queda activa al momento con su enlace para compartir.
+            </p>
+            <label className="mt-3 flex items-start gap-2">
+              <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[var(--brand)]" />
+              <span>
+                Acepto los <Link href="/legal/terminos" target="_blank" className="underline">términos y condiciones</Link> y
+                pido que la invitación se active de inmediato; entiendo que, una vez publicada, pierdo el derecho
+                de desistimiento.
+              </span>
+            </label>
             {demoPayments && (
-              <span className="mt-1 block text-soft">
+              <span className="mt-2 block text-soft">
                 Modo prueba: el pago todavía no está conectado, así que «Publicar» la activa sin cobrar.
               </span>
             )}

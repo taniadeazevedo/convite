@@ -1,9 +1,10 @@
-import { getByToken, markPaid } from "@/lib/db";
+import { markPaid } from "@/lib/db";
 import { createCheckout, demoPayments, stripeEnabled } from "@/lib/payments";
+import { ownedInvitation } from "@/lib/auth";
 
 export async function POST(req: Request, ctx: { params: Promise<{ token: string }> }) {
   const { token } = await ctx.params;
-  const inv = getByToken(token);
+  const inv = await ownedInvitation(token);
   if (!inv) return Response.json({ error: "No encontrada" }, { status: 404 });
   if (inv.paid) return Response.json({ url: `/panel/${token}` });
   if (!inv.data.name1 || !inv.data.name2 || !inv.data.date) {
