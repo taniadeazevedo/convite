@@ -4,7 +4,17 @@ export const PRICE_LABEL = "59 €";
 export const MAX_PHOTOS = 6;
 export const GUEST_PHOTO_LIMIT = 30; // fotos que pueden subir los invitados por boda
 
-export type TemplateId = "lino" | "salvia" | "terracota" | "editorial" | "medianoche";
+export type TemplateId =
+  | "lino"
+  | "salvia"
+  | "terracota"
+  | "editorial"
+  | "medianoche"
+  | "riviera"
+  | "rosa"
+  | "collage"
+  | "postal"
+  | "pop";
 
 export type Template = {
   id: TemplateId;
@@ -20,104 +30,82 @@ export type Template = {
   // Tipografías (variables CSS definidas en layout.tsx)
   titleFont: string;
   bodyFont: string;
+  labelFont: string; // etiquetas pequeñas en mayúsculas
   titleClass: string;
   // Composición: cada plantilla tiene su propia portada y su forma de dibujar tarjetas y botones
-  hero: "arco" | "polaroid" | "boho" | "revista" | "gala";
+  hero: "arco" | "polaroid" | "boho" | "revista" | "gala" | "curva" | "oval" | "collage" | "ticket" | "pop";
   align: "center" | "left";
+  count: "cajas" | "circulos" | "lineas"; // estilo de la cuenta atrás
   radius: string; // tarjetas y campos
   pill: string; // botones
+  grain: boolean; // textura de papel
 };
+
+const inter = "var(--font-inter)";
 
 export const TEMPLATES: Template[] = [
   {
-    id: "lino",
-    name: "Lino",
-    tagline: "Foto en arco y serif en cursiva",
-    bg: "#f4efe8",
-    surface: "#fbf8f3",
-    text: "#3a332c",
-    muted: "#8c8175",
-    accent: "#a08a6e",
-    line: "#e2d9cc",
-    titleFont: "var(--font-cormorant)",
-    bodyFont: "var(--font-inter)",
-    titleClass: "italic font-normal",
-    hero: "arco",
-    align: "center",
-    radius: "1rem",
-    pill: "999px",
+    id: "lino", name: "Lino", tagline: "Foto en arco y serif en cursiva",
+    bg: "#f4efe8", surface: "#fbf8f3", text: "#3a332c", muted: "#8c8175", accent: "#a08a6e", line: "#e2d9cc",
+    titleFont: "var(--font-cormorant)", bodyFont: inter, labelFont: inter, titleClass: "italic font-normal",
+    hero: "arco", align: "center", count: "cajas", radius: "1rem", pill: "999px", grain: true,
   },
   {
-    id: "salvia",
-    name: "Salvia",
-    tagline: "Polaroids y letra manuscrita",
-    bg: "#eef0e8",
-    surface: "#f8f9f4",
-    text: "#2f3a30",
-    muted: "#7a8577",
-    accent: "#7d8f73",
-    line: "#d8ddd0",
-    titleFont: "var(--font-hand)",
-    bodyFont: "var(--font-inter)",
-    titleClass: "font-normal",
-    hero: "polaroid",
-    align: "center",
-    radius: "0.25rem",
-    pill: "0.25rem",
+    id: "salvia", name: "Salvia", tagline: "Polaroids y letra manuscrita",
+    bg: "#eef0e8", surface: "#f8f9f4", text: "#2f3a30", muted: "#7a8577", accent: "#7d8f73", line: "#d8ddd0",
+    titleFont: "var(--font-hand)", bodyFont: inter, labelFont: inter, titleClass: "font-normal",
+    hero: "polaroid", align: "center", count: "cajas", radius: "0.25rem", pill: "0.25rem", grain: true,
   },
   {
-    id: "terracota",
-    name: "Terracota",
-    tagline: "Boho con círculos en tonos tierra",
-    bg: "#f6ece4",
-    surface: "#fcf6f1",
-    text: "#4a2f25",
-    muted: "#96786a",
-    accent: "#b8694a",
-    line: "#ead8cb",
-    titleFont: "var(--font-playfair)",
-    bodyFont: "var(--font-inter)",
-    titleClass: "italic font-normal",
-    hero: "boho",
-    align: "center",
-    radius: "1.75rem",
-    pill: "999px",
+    id: "terracota", name: "Terracota", tagline: "Boho con círculos en tonos tierra",
+    bg: "#f6ece4", surface: "#fcf6f1", text: "#4a2f25", muted: "#96786a", accent: "#b8694a", line: "#ead8cb",
+    titleFont: "var(--font-playfair)", bodyFont: inter, labelFont: inter, titleClass: "italic font-normal",
+    hero: "boho", align: "center", count: "circulos", radius: "1.75rem", pill: "999px", grain: true,
   },
   {
-    id: "editorial",
-    name: "Editorial",
-    tagline: "Revista en blanco y negro",
-    bg: "#ffffff",
-    surface: "#f5f4f1",
-    text: "#141414",
-    muted: "#777777",
-    accent: "#141414",
-    line: "#e3e3df",
-    titleFont: "var(--font-cormorant)",
-    bodyFont: "var(--font-inter)",
+    id: "editorial", name: "Editorial", tagline: "Revista en blanco y negro",
+    bg: "#ffffff", surface: "#f5f4f1", text: "#141414", muted: "#777777", accent: "#141414", line: "#e3e3df",
+    titleFont: "var(--font-cormorant)", bodyFont: inter, labelFont: inter,
     titleClass: "font-light uppercase tracking-[0.04em]",
-    hero: "revista",
-    align: "left",
-    radius: "0",
-    pill: "0",
+    hero: "revista", align: "left", count: "lineas", radius: "0", pill: "0", grain: false,
   },
   {
-    id: "medianoche",
-    name: "Medianoche",
-    tagline: "Gala oscura con foto a pantalla completa",
-    bg: "#1a1917",
-    surface: "#24231f",
-    text: "#efe8dc",
-    muted: "#a69f92",
-    accent: "#c9b38a",
-    line: "#35332d",
-    titleFont: "var(--font-cormorant)",
-    bodyFont: "var(--font-inter)",
+    id: "medianoche", name: "Medianoche", tagline: "Gala oscura con foto a pantalla completa",
+    bg: "#1a1917", surface: "#24231f", text: "#efe8dc", muted: "#a69f92", accent: "#c9b38a", line: "#35332d",
+    titleFont: "var(--font-cormorant)", bodyFont: inter, labelFont: inter,
     titleClass: "font-normal uppercase tracking-[0.2em]",
-    hero: "gala",
-    align: "center",
-    radius: "0",
-    pill: "0",
+    hero: "gala", align: "center", count: "lineas", radius: "0", pill: "0", grain: false,
+  },
+  {
+    id: "riviera", name: "Riviera", tagline: "Verano mediterráneo en azul y limón",
+    bg: "#f7f3ea", surface: "#ffffff", text: "#1d3b5c", muted: "#6c8198", accent: "#d99a1c", line: "#e3dccb",
+    titleFont: "var(--font-playfair)", bodyFont: inter, labelFont: inter, titleClass: "font-normal",
+    hero: "curva", align: "center", count: "cajas", radius: "1.25rem", pill: "999px", grain: true,
+  },
+  {
+    id: "rosa", name: "Rosa", tagline: "Retrato ovalado en rosa empolvado",
+    bg: "#f7ecea", surface: "#fdf7f5", text: "#5a3d3d", muted: "#a08484", accent: "#c98b86", line: "#ecd9d5",
+    titleFont: "var(--font-bodoni)", bodyFont: inter, labelFont: inter, titleClass: "italic font-normal",
+    hero: "oval", align: "center", count: "circulos", radius: "999px", pill: "999px", grain: true,
+  },
+  {
+    id: "collage", name: "Collage", tagline: "Recortes, fotos superpuestas y rojo",
+    bg: "#f3ede2", surface: "#fffdf8", text: "#2b2b2b", muted: "#7c766b", accent: "#c8442f", line: "#ddd4c4",
+    titleFont: "var(--font-dmserif)", bodyFont: inter, labelFont: "var(--font-mono)", titleClass: "font-normal",
+    hero: "collage", align: "left", count: "cajas", radius: "0.125rem", pill: "0.125rem", grain: true,
+  },
+  {
+    id: "postal", name: "Postal", tagline: "Tarjeta de embarque para vuestro viaje",
+    bg: "#e9e4d8", surface: "#fbf9f3", text: "#26241f", muted: "#7e786b", accent: "#5d6b3d", line: "#d3ccbb",
+    titleFont: "var(--font-cormorant)", bodyFont: inter, labelFont: "var(--font-mono)", titleClass: "font-medium",
+    hero: "ticket", align: "center", count: "lineas", radius: "0.5rem", pill: "0.5rem", grain: true,
+  },
+  {
+    id: "pop", name: "Pop", tagline: "Color, tipografía enorme y pegatinas",
+    bg: "#ddd2ff", surface: "#efe9ff", text: "#1b1140", muted: "#5d5289", accent: "#ff5a36", line: "#c4b6f2",
+    titleFont: "var(--font-syne)", bodyFont: inter, labelFont: inter,
+    titleClass: "font-extrabold uppercase tracking-tight",
+    hero: "pop", align: "left", count: "circulos", radius: "1.5rem", pill: "999px", grain: false,
   },
 ];
 
@@ -138,6 +126,7 @@ export type EventBlock = {
 
 export type TimelineItem = { time: string; label: string };
 export type FaqItem = { q: string; a: string };
+export type Milestone = { year: string; text: string };
 
 // Secciones que la pareja puede ocultar desde el panel
 export const SECTIONS = [
@@ -165,6 +154,7 @@ export type InvitationData = {
   dressCode: string;
   gettingThere: string; // tráfico, aparcamiento…
   story: string;
+  milestones: Milestone[]; // la historia contada por años
   timeline: TimelineItem[];
   lodging: string;
   transport: string;
@@ -191,6 +181,7 @@ export function emptyData(): InvitationData {
     dressCode: "",
     gettingThere: "",
     story: "",
+    milestones: [],
     timeline: [],
     lodging: "",
     transport: "",
@@ -206,7 +197,31 @@ export function emptyData(): InvitationData {
   };
 }
 
-export function sampleData(): InvitationData {
+// Fotos de ejemplo de Unsplash (licencia gratuita). Se sirven desde su CDN, no se copian.
+export const unsplash = (id: string, w = 900) =>
+  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=70`;
+
+export const SAMPLE_PHOTOS = [
+  "photo-1606216794074-735e91aa2c92",
+  "photo-1546032996-6dfacbacbf3f",
+  "photo-1606490194859-07c18c9f0968",
+  "photo-1563808599481-34a342e44508",
+  "photo-1537633552985-df8429e8048b",
+  "photo-1607357910286-1ff94ac13c24",
+  "photo-1596457221755-b96bc3a6df18",
+  "photo-1544592732-83bbbfc46783",
+  "photo-1550784718-990c6de52adf",
+  "photo-1543932927-a9def13a0e7c",
+  "photo-1618566864264-fb013f791da4",
+  "photo-1561287495-a3fe1fd28504",
+  "photo-1606216836537-eea72a939072",
+  "photo-1550713450-94c9b4fc9f25",
+];
+
+export function sampleData(templateId?: string): InvitationData {
+  // Cada plantilla enseña fotos distintas para que las miniaturas no se repitan
+  const start = Math.max(0, TEMPLATES.findIndex((t) => t.id === templateId));
+  const pick = (i: number) => unsplash(SAMPLE_PHOTOS[(start + i) % SAMPLE_PHOTOS.length]);
   const d = new Date();
   d.setMonth(d.getMonth() + 5);
   const date = d.toISOString().slice(0, 10);
@@ -233,7 +248,13 @@ export function sampleData(): InvitationData {
     dressCode: "Formal. Habrá césped: mejor tacón ancho.",
     gettingThere: "Hay aparcamiento gratuito en la hacienda. Desde el centro son unos 20 minutos en coche.",
     story:
-      "Nos conocimos en la universidad, en una clase a la que ninguno de los dos quería ir. Diez años, dos mudanzas y un perro después, aquí estamos.",
+      "Nos conocimos en la universidad, en una clase a la que ninguno de los dos quería ir.",
+    milestones: [
+      { year: "2016", text: "Primer café (que acabó siendo cena)." },
+      { year: "2019", text: "Nos mudamos juntos a un piso sin ascensor." },
+      { year: "2022", text: "Llegó Nala, nuestra perra." },
+      { year: "2025", text: "Un «sí» en una playa de Cádiz." },
+    ],
     timeline: [
       { time: "18:00", label: "Ceremonia" },
       { time: "19:30", label: "Cóctel" },
@@ -252,8 +273,8 @@ export function sampleData(): InvitationData {
     off: [],
     rsvpDeadline: d.toISOString().slice(0, 10),
     askAllergies: true,
-    cover: "",
-    photos: [],
+    cover: pick(0),
+    photos: [1, 2, 3, 4, 5, 6].map(pick),
   };
 }
 
@@ -293,6 +314,9 @@ export function sanitizeData(input: unknown, current: InvitationData): Invitatio
     dressCode: str(o.dressCode, 200),
     gettingThere: str(o.gettingThere, 400),
     story: str(o.story, 900),
+    milestones: list(o.milestones, 8)
+      .map((i) => ({ year: str(i.year, 12), text: str(i.text, 200) }))
+      .filter((i) => i.year || i.text),
     timeline: list(o.timeline, 10)
       .map((i) => ({ time: timeStr(i.time), label: str(i.label, 60) }))
       .filter((i) => i.label),

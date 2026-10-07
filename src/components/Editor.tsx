@@ -332,7 +332,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
             <div className="space-y-4">
               <section className="rounded-2xl border border-rule bg-card p-5">
                 <h2 className="font-serif text-2xl">Diseño</h2>
-                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+                <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
                   {TEMPLATES.map((t) => (
                     <button
                       key={t.id}
@@ -391,8 +391,35 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
 
               <Group title="Nuestra historia" section="story" data={data} toggle={toggle}>
                 <Field label="Cómo os conocisteis, en pocas líneas">
-                  <textarea className="field" rows={4} maxLength={900} value={data.story} onChange={(e) => set("story", e.target.value)} />
+                  <textarea className="field" rows={3} maxLength={900} value={data.story} onChange={(e) => set("story", e.target.value)} />
                 </Field>
+                <h3 className="pt-2 text-sm font-semibold uppercase tracking-wider text-soft">Línea del tiempo por años</h3>
+                {data.milestones.map((item, i) => (
+                  <div key={i} className="flex gap-2">
+                    <input
+                      className="field w-24"
+                      maxLength={12}
+                      placeholder="2019"
+                      value={item.year}
+                      onChange={(e) => set("milestones", data.milestones.map((x, j) => (j === i ? { ...x, year: e.target.value } : x)))}
+                    />
+                    <input
+                      className="field"
+                      maxLength={200}
+                      placeholder="Nos fuimos a vivir juntos"
+                      value={item.text}
+                      onChange={(e) => set("milestones", data.milestones.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))}
+                    />
+                    <button type="button" aria-label="Quitar" className="px-2 text-soft" onClick={() => set("milestones", data.milestones.filter((_, j) => j !== i))}>
+                      ✕
+                    </button>
+                  </div>
+                ))}
+                {data.milestones.length < 8 && (
+                  <button type="button" className="btn-ghost px-4 py-2 text-sm" onClick={() => set("milestones", [...data.milestones, { year: "", text: "" }])}>
+                    + Añadir año
+                  </button>
+                )}
               </Group>
 
               <Group title="Lugares y horarios" section="events" data={data} toggle={toggle}>

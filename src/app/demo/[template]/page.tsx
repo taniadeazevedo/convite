@@ -20,7 +20,7 @@ export default async function Demo({ params }: { params: Promise<{ template: str
           Usar este diseño
         </Link>
       </div>
-      <Invitation template={template} data={sampleData()} mode="demo" />
+      <Invitation template={template} data={sampleData(template)} mode="demo" />
     </>
   );
 }

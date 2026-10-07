@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { HEROES, Sparkle } from "./invitation/Heroes";
 import {
   BRAND,
   formatDate,
-  formatDateDots,
   getTemplate,
   mapsLink,
   type EventBlock,
@@ -14,20 +14,41 @@ import {
   type Template,
 } from "@/lib/templates";
 
+type Mode = "live" | "demo" | "preview";
+
 type Props = {
   template: string;
   data: InvitationData;
   // "live": invitación publicada, acepta confirmaciones. "demo"/"preview": el formulario no envía nada.
-  mode: "live" | "demo" | "preview";
+  mode: Mode;
   slug?: string;
   embedded?: boolean;
 };
 
-function Sparkle({ t, size = 18 }: { t: Template; size?: number }) {
+const label = "text-[11px] uppercase tracking-[0.4em]";
+
+// Hace aparecer el contenido al entrar en pantalla. En miniaturas y vista previa se muestra directamente.
+function Reveal({ children, off }: { children: React.ReactNode; off?: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || off) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add("in");
+          io.disconnect();
+        }
+      },
+      { threshold: 0.12 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [off]);
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={t.accent} aria-hidden>
-      <path d="M12 0c.6 6.5 5.5 11.400 12 12c-6.500.6-11.400 5.500-12 12c-.6-6.500-5.500-11.400-12-12c6.500-.6 11.400-5.500 12-12Z" />
-    </svg>
+    <div ref={ref} className={off ? "" : "reveal"}>
+      {children}
+    </div>
   );
 }
 
@@ -45,7 +66,7 @@ function Countdown({ date, t }: { date: string; t: Template }) {
   if (!date || now === null) return <div className="h-20" />;
   const diff = new Date(date + "T12:00:00").getTime() - now;
   if (diff <= 0) {
-    return <p style={{ fontFamily: t.titleFont }} className="text-2xl italic">¡Hoy es el gran día!</p>;
+    return <p style={{ fontFamily: t.titleFont }} className="text-3xl">¡Hoy es el gran día!</p>;
   }
   const s = Math.floor(diff / 1000);
   const parts: [number, string][] = [
@@ -54,84 +75,94 @@ function Countdown({ date, t }: { date: string; t: Template }) {
     [Math.floor((s % 3600) / 60), "min"],
     [s % 60, "seg"],
   ];
+  const justify = t.align === "left" ? "" : "justify-center";
+
+  if (t.count === "lineas") {
+    return (
+      <div className={`flex ${justify}`}>
+        {parts.map(([n, unit], i) => (
+          <div key={unit} className="px-4 text-center" style={{ borderLeft: i ? `1px solid ${t.line}` : undefined }}>
+            <div className="text-4xl tabular-nums" style={{ fontFamily: t.titleFont }}>{n}</div>
+            <div className="mt-1 text-[10px] uppercase tracking-[0.25em]" style={{ color: t.muted, fontFamily: t.labelFont }}>{unit}</div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  const circle = t.count === "circulos";
   return (
-    <div className={`flex gap-3 ${t.align === "left" ? "" : "justify-center"}`}>
-      {parts.map(([n, label]) => (
+    <div className={`flex gap-3 ${justify}`}>
+      {parts.map(([n, unit], i) => (
         <div
-          key={label}
-          className={`flex w-16 flex-col items-center justify-center ${t.hero === "boho" ? "h-16" : "py-3"}`}
+          key={unit}
+          className={`flex w-[4.5rem] flex-col items-center justify-center ${circle ? "h-[4.5rem]" : "py-4"}`}
           style={{
-            background: t.hero === "revista" ? "transparent" : t.surface,
+            background: circle && i === 0 ? t.accent : t.surface,
+            color: circle && i === 0 ? t.surface : t.text,
             border: `1px solid ${t.line}`,
-            borderRadius: t.hero === "boho" ? "999px" : t.radius,
+            borderRadius: circle ? "999px" : t.radius,
           }}
         >
-          <div className="text-2xl tabular-nums" style={{ fontFamily: t.titleFont }}>
-            {n}
-          </div>
-          <div className="text-[10px] uppercase tracking-wider" style={{ color: t.muted }}>
-            {label}
-          </div>
+          <div className="text-2xl leading-none tabular-nums" style={{ fontFamily: t.titleFont }}>{n}</div>
+          <div className="mt-1 text-[10px] uppercase tracking-wider opacity-70">{unit}</div>
         </div>
       ))}
     </div>
   );
 }
 
-function Section({ title, t, children }: { title: string; t: Template; children: React.ReactNode }) {
+function Section({
+  title,
+  eyebrow,
+  t,
+  off,
+  children,
+}: {
+  title: string;
+  eyebrow: string;
+  t: Template;
+  off?: boolean;
+  children: React.ReactNode;
+}) {
   const left = t.align === "left";
   return (
-    <section
-      className={`px-6 py-14 ${left ? "text-left" : "text-center"}`}
-      style={{ borderTop: `1px solid ${t.line}` }}
-    >
-      {!left && (
-        <div className="mb-3 flex justify-center">
-          <Sparkle t={t} size={14} />
+    <section className={`px-6 py-16 ${left ? "text-left" : "text-center"}`} style={{ borderTop: `1px solid ${t.line}` }}>
+      <Reveal off={off}>
+        <div className={`mb-3 flex items-center gap-3 ${left ? "" : "justify-center"}`}>
+          {!left && <Sparkle t={t} size={10} />}
+          <p className={label} style={{ color: t.accent, fontFamily: t.labelFont }}>{eyebrow}</p>
+          {!left && <Sparkle t={t} size={10} />}
         </div>
-      )}
-      <h2
-        className={`mb-7 ${left ? "text-5xl" : "text-4xl"} ${t.titleClass}`}
-        style={{ fontFamily: t.titleFont }}
-      >
-        {title}
-      </h2>
-      {children}
+        <h2 className={`mb-8 ${left ? "text-5xl" : "text-[2.6rem]"} leading-[1.05] ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
+          {title}
+        </h2>
+        {children}
+      </Reveal>
     </section>
   );
 }
 
-function EventCard({ label, b, t }: { label: string; b: EventBlock; t: Template }) {
+function EventCard({ name, b, t }: { name: string; b: EventBlock; t: Template }) {
   const link = mapsLink(b);
   if (!b.place && !b.time) return null;
+  // el radio "píldora" de algunas plantillas no sirve para una tarjeta
+  const radius = t.radius === "999px" ? "1.5rem" : t.radius;
   return (
-    <div
-      className="flex-1 p-6"
-      style={{ background: t.surface, border: `1px solid ${t.line}`, borderRadius: t.radius }}
-    >
-      <div className="text-xs uppercase tracking-[0.2em]" style={{ color: t.accent }}>
-        {label}
-      </div>
-      {b.time && (
-        <div className="mt-2 text-3xl" style={{ fontFamily: t.titleFont }}>
-          {b.time}
-        </div>
-      )}
-      {b.place && <div className="mt-2 font-semibold">{b.place}</div>}
-      {b.address && (
-        <div className="mt-1 text-sm" style={{ color: t.muted }}>
-          {b.address}
-        </div>
-      )}
+    <div className="flex-1 p-7" style={{ background: t.surface, border: `1px solid ${t.line}`, borderRadius: radius }}>
+      <div className="text-[10px] uppercase tracking-[0.3em]" style={{ color: t.accent, fontFamily: t.labelFont }}>{name}</div>
+      {b.time && <div className="mt-3 text-5xl leading-none" style={{ fontFamily: t.titleFont }}>{b.time}</div>}
+      <div className={`my-4 h-px w-8 ${t.align === "left" ? "" : "mx-auto"}`} style={{ background: t.accent }} />
+      {b.place && <div className="font-semibold">{b.place}</div>}
+      {b.address && <div className="mt-1 text-sm" style={{ color: t.muted }}>{b.address}</div>}
       {link && (
         <a
           href={link}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 inline-block px-4 py-2 text-sm font-semibold"
+          className="mt-5 inline-block px-5 py-2 text-sm font-semibold"
           style={{ border: `1px solid ${t.accent}`, color: t.accent, borderRadius: t.pill }}
         >
-          Cómo llegar
+          Cómo llegar →
         </a>
       )}
     </div>
@@ -146,7 +177,63 @@ function Note({ t, title, text }: { t: Template; title: string; text: string }) 
   );
 }
 
-function RsvpForm({ t, data, mode, slug }: { t: Template; data: InvitationData; mode: Props["mode"]; slug?: string }) {
+function Gallery({ t, photos }: { t: Template; photos: string[] }) {
+  const img = (src: string, className: string, style?: React.CSSProperties) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img key={src} src={src} alt="" loading="lazy" className={`w-full object-cover ${className}`} style={style} />
+  );
+  switch (t.hero) {
+    case "polaroid":
+    case "collage":
+      return (
+        <div className="grid grid-cols-2 gap-5 px-1">
+          {photos.map((src, i) => (
+            <div key={src} className={`bg-white p-2 shadow-lg ${t.hero === "polaroid" ? "pb-8" : ""} ${i % 2 ? "rotate-2" : "-rotate-2"}`}>
+              {img(src, "aspect-square")}
+            </div>
+          ))}
+        </div>
+      );
+    case "revista":
+      return <div className="grid grid-cols-2 gap-px sm:grid-cols-3">{photos.map((src) => img(src, "aspect-[4/5] grayscale"))}</div>;
+    case "gala":
+      return (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {photos.map((src) => img(src, "aspect-square", { border: `1px solid ${t.accent}`, padding: 4 }))}
+        </div>
+      );
+    case "boho":
+      return (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {photos.map((src, i) => img(src, `aspect-square ${i % 2 ? "rounded-[2rem]" : "rounded-full"}`))}
+        </div>
+      );
+    case "oval":
+      return <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">{photos.map((src) => img(src, "aspect-[3/4] rounded-[50%]"))}</div>;
+    case "curva":
+    case "pop":
+      // la primera foto ocupa todo el ancho
+      return (
+        <div className="grid grid-cols-2 gap-3">
+          {photos.map((src, i) => (
+            <div key={src} className={i === 0 ? "col-span-2" : ""}>
+              {img(src, `${i === 0 ? "aspect-[16/10]" : "aspect-square"} ${t.hero === "pop" ? "rounded-[2rem]" : "rounded-2xl"}`)}
+            </div>
+          ))}
+        </div>
+      );
+    case "ticket":
+      return <div className="grid grid-cols-3 gap-2">{photos.map((src) => img(src, "aspect-square rounded-md"))}</div>;
+    default:
+      return (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {photos.map((src, i) => img(src, `aspect-[3/4] ${i % 2 ? "rounded-2xl" : "rounded-t-full"}`))}
+        </div>
+      );
+  }
+}
+
+function RsvpForm({ t, data, mode, slug }: { t: Template; data: InvitationData; mode: Mode; slug?: string }) {
   const [attending, setAttending] = useState(true);
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [error, setError] = useState("");
@@ -182,35 +269,24 @@ function RsvpForm({ t, data, mode, slug }: { t: Template; data: InvitationData; 
 
   if (state === "done") {
     return (
-      <p className="text-lg" style={{ fontFamily: t.titleFont }}>
+      <p className="text-2xl" style={{ fontFamily: t.titleFont }}>
         {mode === "live" ? "¡Gracias! Hemos recibido tu respuesta." : "Así verán tus invitados la confirmación enviada."}
       </p>
     );
   }
 
-  const input = {
-    background: t.surface,
-    border: `1px solid ${t.line}`,
-    color: t.text,
-    borderRadius: t.radius,
-  };
+  const fieldRadius = t.radius === "999px" ? "1.5rem" : t.radius;
+  const input = { background: t.surface, border: `1px solid ${t.line}`, color: t.text, borderRadius: fieldRadius };
   const pill = (active: boolean) => ({
     border: `1px solid ${active ? t.accent : t.line}`,
     background: active ? t.accent : "transparent",
-    color: active ? t.bg : t.text,
+    color: active ? t.surface : t.text,
     borderRadius: t.pill,
   });
 
   return (
     <form onSubmit={submit} className={`max-w-sm space-y-3 text-left ${t.align === "left" ? "" : "mx-auto"}`}>
-      <input
-        name="name"
-        required
-        maxLength={80}
-        placeholder="Nombre y apellidos"
-        className="w-full px-4 py-3"
-        style={input}
-      />
+      <input name="name" required maxLength={80} placeholder="Nombre y apellidos" className="w-full px-4 py-3" style={input} />
       <div className="grid grid-cols-2 gap-2">
         <button type="button" onClick={() => setAttending(true)} className="py-3 font-semibold" style={pill(attending)}>
           Asistiré
@@ -225,238 +301,28 @@ function RsvpForm({ t, data, mode, slug }: { t: Template; data: InvitationData; 
             ¿Cuántos sois en total?
             <select name="guests" defaultValue="1" className="mt-1 w-full px-4 py-3" style={input}>
               {[1, 2, 3, 4, 5, 6].map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
+                <option key={n} value={n}>{n}</option>
               ))}
             </select>
           </label>
           {data.askAllergies && (
-            <input
-              name="allergies"
-              maxLength={200}
-              placeholder="Alergias o intolerancias (opcional)"
-              className="w-full px-4 py-3"
-              style={input}
-            />
+            <input name="allergies" maxLength={200} placeholder="Alergias o intolerancias (opcional)" className="w-full px-4 py-3" style={input} />
           )}
         </>
       )}
-      <textarea
-        name="message"
-        maxLength={400}
-        rows={3}
-        placeholder="Mensaje para los novios (opcional)"
-        className="w-full px-4 py-3"
-        style={input}
-      />
+      <textarea name="message" maxLength={400} rows={3} placeholder="Mensaje para los novios (opcional)" className="w-full px-4 py-3" style={input} />
       {/* Campo trampa para bots: las personas no lo ven */}
       <input name="web" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
       {state === "error" && <p className="text-sm text-red-500">{error}</p>}
       <button
         type="submit"
         disabled={state === "sending"}
-        className="w-full py-3 font-semibold"
-        style={{ background: t.accent, color: t.bg, borderRadius: t.pill }}
+        className="w-full py-3.5 font-semibold"
+        style={{ background: t.accent, color: t.surface, borderRadius: t.pill }}
       >
         {state === "sending" ? "Enviando…" : "Enviar confirmación"}
       </button>
     </form>
-  );
-}
-
-type HeroProps = { t: Template; data: InvitationData; name1: string; name2: string; embedded?: boolean };
-
-function Photo({ t, data, name1, name2, className }: HeroProps & { className: string }) {
-  if (data.cover) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={data.cover} alt="" className={`object-cover ${className}`} />;
-  }
-  return (
-    <div
-      className={`flex items-center justify-center text-5xl ${className}`}
-      style={{
-        fontFamily: t.titleFont,
-        color: t.accent,
-        background: `linear-gradient(160deg, ${t.surface}, ${t.line})`,
-      }}
-    >
-      {name1[0]}
-      <span className="mx-1 text-2xl">&</span>
-      {name2[0]}
-    </div>
-  );
-}
-
-const label = "text-[11px] uppercase tracking-[0.4em]";
-
-function HeroArco(p: HeroProps) {
-  const { t, data, name1, name2 } = p;
-  return (
-    <header className={`flex flex-col items-center justify-center gap-7 px-6 py-16 text-center ${p.embedded ? "" : "min-h-svh"}`}>
-      <p className={label} style={{ color: t.muted }}>nos casamos</p>
-      <div className="h-80 w-60 overflow-hidden rounded-t-full" style={{ border: `1px solid ${t.line}` }}>
-        <Photo {...p} className="h-full w-full" />
-      </div>
-      <h1 className={`text-5xl leading-[1.05] sm:text-6xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
-        {name1}
-        <span className="block text-3xl not-italic" style={{ color: t.accent }}>&</span>
-        {name2}
-      </h1>
-      <div className="flex items-center gap-3">
-        <Sparkle t={t} size={12} />
-        <p className="text-sm tracking-[0.3em]">{formatDateDots(data.date) || "fecha por confirmar"}</p>
-        <Sparkle t={t} size={12} />
-      </div>
-      {data.city && <p className={label} style={{ color: t.muted }}>{data.city}</p>}
-    </header>
-  );
-}
-
-function HeroPolaroid(p: HeroProps) {
-  const { t, data, name1, name2 } = p;
-  return (
-    <header className={`flex flex-col items-center justify-center gap-8 px-6 py-16 text-center ${p.embedded ? "" : "min-h-svh"}`}>
-      <p className="text-3xl" style={{ fontFamily: t.titleFont, color: t.accent }}>¡nos casamos!</p>
-      <div className="relative -rotate-3 bg-white p-3 pb-4 shadow-xl">
-        {/* trozo de celo */}
-        <div className="absolute -top-3 left-1/2 h-6 w-24 -translate-x-1/2 rotate-2" style={{ background: t.accent, opacity: 0.35 }} />
-        <Photo {...p} className="h-64 w-56" />
-        <p className="mt-3 text-2xl text-neutral-700" style={{ fontFamily: t.titleFont }}>
-          {formatDateDots(data.date) || "muy pronto"}
-        </p>
-      </div>
-      <h1 className="text-6xl leading-none sm:text-7xl" style={{ fontFamily: t.titleFont }}>
-        {name1} <span style={{ color: t.accent }}>+</span> {name2}
-      </h1>
-      {data.city && <p className={label} style={{ color: t.muted }}>{data.city}</p>}
-    </header>
-  );
-}
-
-function HeroBoho(p: HeroProps) {
-  const { t, data, name1, name2 } = p;
-  return (
-    <header className={`relative flex flex-col items-center justify-center gap-8 overflow-hidden px-6 py-16 text-center ${p.embedded ? "" : "min-h-svh"}`}>
-      <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full" style={{ background: t.accent, opacity: 0.14 }} />
-      <div className="absolute -right-20 bottom-10 h-52 w-52 rounded-full" style={{ background: t.accent, opacity: 0.1 }} />
-      <div className="relative">
-        <div className="absolute inset-0 translate-x-4 translate-y-4 rounded-full" style={{ border: `1.5px solid ${t.accent}` }} />
-        <div className="relative h-64 w-64 overflow-hidden rounded-full">
-          <Photo {...p} className="h-full w-full" />
-        </div>
-      </div>
-      <div className="relative">
-        <h1 className={`text-5xl leading-tight sm:text-6xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
-          {name1} <span style={{ color: t.accent }}>y</span> {name2}
-        </h1>
-        {/* arcoíris boho */}
-        <svg className="mx-auto mt-6" width="72" height="38" viewBox="0 0 72 38" fill="none" aria-hidden>
-          {[34, 25, 16].map((r, i) => (
-            <path key={r} d={`M${36 - r} 38a${r} ${r} 0 0 1 ${r * 2} 0`} stroke={t.accent} strokeWidth="3" opacity={1 - i * 0.3} />
-          ))}
-        </svg>
-        <p className="mt-6 text-lg">{formatDate(data.date) || "Fecha por confirmar"}</p>
-        {data.city && <p className={`mt-2 ${label}`} style={{ color: t.muted }}>{data.city}</p>}
-      </div>
-    </header>
-  );
-}
-
-function HeroRevista(p: HeroProps) {
-  const { t, data, name1, name2 } = p;
-  const [y, m, d] = data.date ? data.date.split("-") : ["", "", ""];
-  return (
-    <header className={`flex flex-col px-6 py-8 ${p.embedded ? "" : "min-h-svh"}`}>
-      <div className="flex justify-between pb-3 text-[10px] uppercase tracking-[0.3em]" style={{ borderBottom: `1px solid ${t.text}` }}>
-        <span>La boda</span>
-        <span>{data.city || "Edición única"}</span>
-      </div>
-      <h1 className={`py-6 text-[4.2rem] leading-[0.9] sm:text-8xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
-        {name1}
-        <br />
-        <span className="italic normal-case">&</span> {name2}
-      </h1>
-      <Photo {...p} className="aspect-[4/5] w-full grayscale" />
-      <div className="mt-4 flex items-end justify-between pt-3" style={{ borderTop: `1px solid ${t.text}` }}>
-        <p className="max-w-[9rem] text-[10px] uppercase leading-relaxed tracking-[0.3em]" style={{ color: t.muted }}>
-          Reserva la fecha
-        </p>
-        <p className="text-5xl font-light tabular-nums" style={{ fontFamily: t.titleFont }}>
-          {data.date ? `${d}.${m}.${y.slice(2)}` : "--.--.--"}
-        </p>
-      </div>
-    </header>
-  );
-}
-
-function HeroGala(p: HeroProps) {
-  const { t, data, name1, name2 } = p;
-  return (
-    <header className={`relative flex items-center justify-center p-4 text-center ${p.embedded ? "min-h-[600px]" : "min-h-svh"}`}>
-      {data.cover && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={data.cover} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      )}
-      <div className="absolute inset-0" style={{ background: t.bg, opacity: data.cover ? 0.7 : 1 }} />
-      <div className="absolute inset-4" style={{ border: `1px solid ${t.accent}` }} />
-      <div className="absolute inset-6" style={{ border: `1px solid ${t.accent}`, opacity: 0.4 }} />
-      <div className="relative flex flex-col items-center gap-7 px-8 py-20">
-        <Sparkle t={t} size={22} />
-        <p className={label} style={{ color: t.accent }}>Tenemos el honor de invitaros</p>
-        <h1 className={`text-4xl leading-snug sm:text-5xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
-          {name1}
-          <span className="my-2 block text-2xl italic normal-case tracking-normal" style={{ color: t.accent }}>y</span>
-          {name2}
-        </h1>
-        <div className="h-px w-16" style={{ background: t.accent }} />
-        <p className="text-sm tracking-[0.3em]">{formatDateDots(data.date) || "fecha por confirmar"}</p>
-        {data.city && <p className={label} style={{ color: t.muted }}>{data.city}</p>}
-      </div>
-    </header>
-  );
-}
-
-const HEROES = { arco: HeroArco, polaroid: HeroPolaroid, boho: HeroBoho, revista: HeroRevista, gala: HeroGala };
-
-function Gallery({ t, photos }: { t: Template; photos: string[] }) {
-  if (t.hero === "polaroid") {
-    return (
-      <div className="grid grid-cols-2 gap-5">
-        {photos.map((src, i) => (
-          <div key={src} className={`bg-white p-2 pb-8 shadow-lg ${i % 2 ? "rotate-2" : "-rotate-2"}`}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={src} alt="" className="aspect-square w-full object-cover" />
-          </div>
-        ))}
-      </div>
-    );
-  }
-  const shape = (i: number) => {
-    switch (t.hero) {
-      case "arco":
-        return `aspect-[3/4] ${i % 2 ? "rounded-2xl" : "rounded-t-full"}`;
-      case "boho":
-        return `aspect-square ${i % 2 ? "rounded-[2rem]" : "rounded-full"}`;
-      case "revista":
-        return "aspect-[4/5] grayscale";
-      default:
-        return "aspect-square";
-    }
-  };
-  return (
-    <div className={`grid grid-cols-2 sm:grid-cols-3 ${t.hero === "revista" ? "gap-px" : "gap-3"}`}>
-      {photos.map((src, i) => (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          key={src}
-          src={src}
-          alt=""
-          className={`w-full object-cover ${shape(i)}`}
-          style={t.hero === "gala" ? { border: `1px solid ${t.accent}`, padding: 4 } : undefined}
-        />
-      ))}
-    </div>
   );
 }
 
@@ -468,42 +334,63 @@ export default function Invitation({ template, data, mode, slug, embedded }: Pro
   const Hero = HEROES[t.hero];
   const left = t.align === "left";
   const on = (id: SectionId) => !data.off.includes(id);
+  const block = left ? "" : "mx-auto";
+  const cardRadius = t.radius === "999px" ? "1.5rem" : t.radius;
+  const plainMessage = t.hero === "pop" || t.hero === "revista";
 
   return (
-    <div style={{ background: t.bg, color: t.text, fontFamily: t.bodyFont }} className={embedded ? "" : "min-h-svh"}>
+    <div
+      style={{ background: t.bg, color: t.text, fontFamily: t.bodyFont }}
+      className={`${embedded ? "" : "min-h-svh"} ${t.grain ? "grain" : ""}`}
+    >
       <div className="mx-auto max-w-2xl">
         <Hero t={t} data={data} name1={name1} name2={name2} embedded={embedded} />
 
         {(on("countdown") || data.message) && (
-          <section className={`px-6 py-14 ${left ? "text-left" : "text-center"}`} style={{ borderTop: `1px solid ${t.line}` }}>
-            {on("countdown") && (
-              <>
-                <p className={`mb-5 ${label}`} style={{ color: t.muted }}>Faltan</p>
-                <Countdown date={data.date} t={t} />
-              </>
-            )}
-            {data.message && (
-              <p
-                className={`max-w-md whitespace-pre-line leading-relaxed ${on("countdown") ? "mt-10" : ""} ${left ? "text-lg" : "mx-auto text-2xl"}`}
-                style={left ? undefined : { fontFamily: t.titleFont }}
-              >
-                {data.message}
-              </p>
-            )}
+          <section className={`px-6 py-16 ${left ? "text-left" : "text-center"}`} style={{ borderTop: `1px solid ${t.line}` }}>
+            <Reveal off={embedded}>
+              {on("countdown") && (
+                <>
+                  <p className={`mb-6 ${label}`} style={{ color: t.muted, fontFamily: t.labelFont }}>Faltan</p>
+                  <Countdown date={data.date} t={t} />
+                </>
+              )}
+              {data.message && (
+                <p
+                  className={`max-w-md whitespace-pre-line ${on("countdown") ? "mt-12" : ""} ${block} ${
+                    plainMessage ? "text-xl leading-relaxed" : "text-[1.7rem] leading-snug"
+                  }`}
+                  style={plainMessage ? undefined : { fontFamily: t.titleFont }}
+                >
+                  {data.message}
+                </p>
+              )}
+            </Reveal>
           </section>
         )}
 
-        {on("story") && data.story && (
-          <Section title="Nuestra historia" t={t}>
-            <p className={`max-w-md whitespace-pre-line leading-relaxed ${left ? "" : "mx-auto"}`}>{data.story}</p>
+        {on("story") && (data.story || data.milestones.length > 0) && (
+          <Section eyebrow="Cómo empezó todo" title="Nuestra historia" t={t} off={embedded}>
+            {data.story && <p className={`max-w-md whitespace-pre-line leading-relaxed ${block}`}>{data.story}</p>}
+            {data.milestones.length > 0 && (
+              <ol className={`mt-10 max-w-sm text-left ${block}`} style={{ borderLeft: `1px solid ${t.accent}` }}>
+                {data.milestones.map((m, i) => (
+                  <li key={i} className="relative pb-8 pl-7 last:pb-0">
+                    <span className="absolute top-2 -left-[5px] h-[9px] w-[9px] rounded-full" style={{ background: t.accent }} />
+                    <div className="text-4xl leading-none" style={{ fontFamily: t.titleFont, color: t.accent }}>{m.year}</div>
+                    <p className="mt-2 leading-relaxed">{m.text}</p>
+                  </li>
+                ))}
+              </ol>
+            )}
           </Section>
         )}
 
         {on("events") && hasEvents && (
-          <Section title="El día" t={t}>
+          <Section eyebrow="Dónde y cuándo" title="El día" t={t} off={embedded}>
             <div className="flex flex-col gap-4 sm:flex-row">
-              <EventCard label="Ceremonia" b={data.ceremony} t={t} />
-              <EventCard label="Celebración" b={data.party} t={t} />
+              <EventCard name="Ceremonia" b={data.ceremony} t={t} />
+              <EventCard name="Celebración" b={data.party} t={t} />
             </div>
             {data.gettingThere && <Note t={t} title="Cómo llegar" text={data.gettingThere} />}
             {data.dressCode && <Note t={t} title="Vestimenta" text={data.dressCode} />}
@@ -511,18 +398,14 @@ export default function Invitation({ template, data, mode, slug, embedded }: Pro
         )}
 
         {on("timeline") && data.timeline.length > 0 && (
-          <Section title="Cronograma" t={t}>
-            <ol className={`max-w-xs ${left ? "" : "mx-auto"}`}>
+          <Section eyebrow="Minuto a minuto" title="Cronograma" t={t} off={embedded}>
+            <ol className={`max-w-xs ${block}`}>
               {data.timeline.map((item, i) => (
-                <li
-                  key={i}
-                  className="flex items-baseline gap-5 py-3 text-left"
-                  style={{ borderTop: i ? `1px solid ${t.line}` : undefined }}
-                >
-                  <span className="w-16 text-2xl tabular-nums" style={{ fontFamily: t.titleFont, color: t.accent }}>
+                <li key={i} className="flex items-baseline gap-5 py-4 text-left" style={{ borderTop: i ? `1px solid ${t.line}` : undefined }}>
+                  <span className="w-20 text-3xl leading-none tabular-nums" style={{ fontFamily: t.titleFont, color: t.accent }}>
                     {item.time}
                   </span>
-                  <span>{item.label}</span>
+                  <span className="text-lg">{item.label}</span>
                 </li>
               ))}
             </ol>
@@ -530,31 +413,42 @@ export default function Invitation({ template, data, mode, slug, embedded }: Pro
         )}
 
         {on("travel") && (data.lodging || data.transport) && (
-          <Section title="Alojamiento y transporte" t={t}>
-            {data.lodging && <Note t={t} title="Dónde dormir" text={data.lodging} />}
-            {data.transport && <Note t={t} title="Autobuses" text={data.transport} />}
+          <Section eyebrow="Para los que venís de fuera" title="Alojamiento y transporte" t={t} off={embedded}>
+            <div className="grid gap-4 text-left sm:grid-cols-2">
+              {[
+                ["Dónde dormir", data.lodging],
+                ["Autobuses", data.transport],
+              ]
+                .filter(([, text]) => text)
+                .map(([title, text]) => (
+                  <div key={title} className="p-6" style={{ background: t.surface, border: `1px solid ${t.line}`, borderRadius: cardRadius }}>
+                    <div className="text-2xl" style={{ fontFamily: t.titleFont }}>{title}</div>
+                    <p className="mt-2 text-sm leading-relaxed" style={{ color: t.muted }}>{text}</p>
+                  </div>
+                ))}
+            </div>
           </Section>
         )}
 
         {on("gallery") && data.photos.length > 0 && (
-          <Section title="Nosotros" t={t}>
+          <Section eyebrow="Álbum" title="Nosotros" t={t} off={embedded}>
             <Gallery t={t} photos={data.photos} />
           </Section>
         )}
 
         {on("gifts") && (data.giftsText || data.iban || data.giftsUrl) && (
-          <Section title="Regalo" t={t}>
-            {data.giftsText && <p className={`max-w-md leading-relaxed ${left ? "" : "mx-auto"}`}>{data.giftsText}</p>}
+          <Section eyebrow="Si queréis tener un detalle" title="Regalo" t={t} off={embedded}>
+            {data.giftsText && <p className={`max-w-md leading-relaxed ${block}`}>{data.giftsText}</p>}
             {data.iban && (
               <p
-                className="mt-4 inline-block px-4 py-3 font-mono text-sm"
-                style={{ background: t.surface, border: `1px solid ${t.line}`, borderRadius: t.radius }}
+                className="mt-5 inline-block px-5 py-3 font-mono text-sm"
+                style={{ background: t.surface, border: `1px dashed ${t.accent}`, borderRadius: cardRadius }}
               >
                 {data.iban}
               </p>
             )}
             {data.giftsUrl && (
-              <p className="mt-4">
+              <p className="mt-5">
                 <a
                   href={data.giftsUrl}
                   target="_blank"
@@ -562,7 +456,7 @@ export default function Invitation({ template, data, mode, slug, embedded }: Pro
                   className="inline-block px-5 py-2 text-sm font-semibold"
                   style={{ border: `1px solid ${t.accent}`, color: t.accent, borderRadius: t.pill }}
                 >
-                  Ver lista de regalos
+                  Ver lista de regalos →
                 </a>
               </p>
             )}
@@ -570,15 +464,11 @@ export default function Invitation({ template, data, mode, slug, embedded }: Pro
         )}
 
         {on("faq") && data.faq.length > 0 && (
-          <Section title="Preguntas frecuentes" t={t}>
-            <div className={`max-w-md space-y-2 text-left ${left ? "" : "mx-auto"}`}>
+          <Section eyebrow="Por si os lo preguntáis" title="Preguntas frecuentes" t={t} off={embedded}>
+            <div className={`max-w-md text-left ${block}`}>
               {data.faq.map((f, i) => (
-                <details
-                  key={i}
-                  className="px-4 py-3"
-                  style={{ background: t.surface, border: `1px solid ${t.line}`, borderRadius: t.radius }}
-                >
-                  <summary className="cursor-pointer font-semibold">{f.q}</summary>
+                <details key={i} className="py-4" style={{ borderTop: `1px solid ${t.line}` }}>
+                  <summary className="cursor-pointer text-lg font-medium">{f.q}</summary>
                   <p className="mt-2 text-sm leading-relaxed" style={{ color: t.muted }}>{f.a}</p>
                 </details>
               ))}
@@ -587,7 +477,7 @@ export default function Invitation({ template, data, mode, slug, embedded }: Pro
         )}
 
         {on("rsvp") && (
-          <Section title="¿Vienes?" t={t}>
+          <Section eyebrow="Confirma tu asistencia" title="¿Vienes?" t={t} off={embedded}>
             {data.rsvpDeadline && (
               <p className="mb-6 text-sm" style={{ color: t.muted }}>
                 Por favor, responde antes del {formatDate(data.rsvpDeadline).replace(/^\S+\s/, "")}.
@@ -598,8 +488,8 @@ export default function Invitation({ template, data, mode, slug, embedded }: Pro
         )}
 
         {on("album") && (
-          <Section title="Comparte tus fotos" t={t}>
-            <p className={`max-w-md leading-relaxed ${left ? "" : "mx-auto"}`}>
+          <Section eyebrow="Después de la boda" title="Comparte tus fotos" t={t} off={embedded}>
+            <p className={`max-w-md leading-relaxed ${block}`}>
               ¿Has hecho fotos en la boda? Súbelas aquí y nos llegarán directamente.
             </p>
             <p className="mt-5">
@@ -608,15 +498,20 @@ export default function Invitation({ template, data, mode, slug, embedded }: Pro
                 className="inline-block px-5 py-2 text-sm font-semibold"
                 style={{ border: `1px solid ${t.accent}`, color: t.accent, borderRadius: t.pill }}
               >
-                Subir fotos
+                Subir fotos →
               </a>
             </p>
           </Section>
         )}
 
-        <footer className="px-6 py-8 text-center text-xs" style={{ color: t.muted, borderTop: `1px solid ${t.line}` }}>
-          {name1} & {name2} · Hecha con{" "}
-          <Link href="/" className="underline">{BRAND}</Link>
+        <footer className="px-6 py-12 text-center" style={{ borderTop: `1px solid ${t.line}` }}>
+          <p className={`text-4xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
+            {name1} <span style={{ color: t.accent }}>&</span> {name2}
+          </p>
+          <p className="mt-4 text-xs" style={{ color: t.muted }}>
+            Hecha con{" "}
+            <Link href="/" className="underline">{BRAND}</Link>
+          </p>
         </footer>
       </div>
     </div>
