@@ -79,6 +79,9 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
   // En pantallas pequeñas se alterna entre el formulario y la vista previa
   const [mobilePreview, setMobilePreview] = useState(false);
   const [copied, setCopied] = useState(false);
+  // Se pone a true si se pulsa «Publicar» sin haber marcado la casilla de los términos
+  const [needAccept, setNeedAccept] = useState(false);
+  const acceptRef = useRef<HTMLLabelElement>(null);
   // Plan elegido para publicar; una vez publicada, el que tiene contratado
   const [plan, setPlan] = useState<PlanId>(initial.plan);
   const limits = PLANS[initial.paid ? initial.plan : "basico"];
@@ -163,6 +166,12 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
 
   // planToBuy: el elegido al publicar, o "premium" al mejorar una invitación ya publicada
   async function pay(planToBuy: PlanId = plan) {
+    // Para publicar hay que aceptar los términos: si falta, se avisa en rojo junto a la casilla
+    if (!initial.paid && !accepted) {
+      setNeedAccept(true);
+      acceptRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     setPaying(true);
     const res = await fetch(`${api}/pago`, {
       method: "POST",
@@ -233,7 +242,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
             </a>
           )}
           {!initial.paid && !guest && (
-            <button onClick={() => pay()} disabled={paying || !accepted} className="btn px-4 py-2 text-sm" title={accepted ? undefined : "Marca la casilla de abajo para publicar"}>
+            <button onClick={() => pay()} disabled={paying} className="btn px-4 py-2 text-sm">
               {paying ? "Un momento…" : `Publicar · ${PLANS[plan].label}`}
             </button>
           )}
@@ -342,14 +351,30 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
                 </label>
               ))}
             </div>
-            <label className="mt-3 flex items-start gap-2">
-              <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[var(--brand)]" />
+            <label
+              ref={acceptRef}
+              className={`mt-3 flex items-start gap-2 rounded-xl ${needAccept && !accepted ? "border border-red-500 bg-red-50 p-3" : ""}`}
+            >
+              <input
+                type="checkbox"
+                checked={accepted}
+                onChange={(e) => {
+                  setAccepted(e.target.checked);
+                  setNeedAccept(false);
+                }}
+                className="mt-0.5 h-4 w-4 accent-[var(--brand)]"
+              />
               <span>
                 Acepto los <Link href="/legal/terminos" target="_blank" className="underline">términos y condiciones</Link> y
                 pido que la invitación se active de inmediato; entiendo que, una vez publicada, pierdo el derecho
                 de desistimiento.
               </span>
             </label>
+            {needAccept && !accepted && (
+              <p role="alert" className="mt-2 font-semibold text-red-600">
+                Solo falta esto: marcad la casilla de arriba para poder publicar.
+              </p>
+            )}
             {demoPayments && (
               <span className="mt-2 block text-soft">
                 Modo prueba: el pago todavía no está conectado, así que «Publicar» la activa sin cobrar.
