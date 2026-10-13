@@ -38,12 +38,15 @@ export async function createCheckout(token: string, origin: string, plan: PlanId
   return session.url!;
 }
 
+// Cobrado, o completado sin importe (código promocional del 100 %): en los dos casos se activa
+const isSettled = (status: string) => status === "paid" || status === "no_payment_required";
+
 const planOf = (metadata: Record<string, string> | null | undefined): PlanId => (isPlanId(metadata?.plan) ? metadata.plan : "basico");
 
 // Devuelve el plan pagado, o null si esa sesión no es un pago completado de esta invitación
 export async function paidPlanOfSession(sessionId: string, token: string): Promise<PlanId | null> {
   const session = await stripe().checkout.sessions.retrieve(sessionId);
-  if (session.client_reference_id !== token || session.payment_status !== "paid") return null;
+  if (session.client_reference_id !== token || session.status !== "complete" || !isSettled(session.payment_status)) return null;
   return planOf(session.metadata);
 }
 
@@ -55,6 +58,6 @@ export function paidFromWebhook(body: string, signature: string): { token: strin
   const event = stripe().webhooks.constructEvent(body, signature, secret);
   if (event.type !== "checkout.session.completed") return null;
   const session = event.data.object;
-  if (session.payment_status !== "paid" || !session.client_reference_id) return null;
+  if (!isSettled(session.payment_status) || !session.client_reference_id) return null;
   return { token: session.client_reference_id, plan: planOf(session.metadata) };
 }
