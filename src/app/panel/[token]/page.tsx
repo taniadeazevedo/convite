@@ -15,9 +15,11 @@ type Props = {
 
 export default async function Panel({ params, searchParams }: Props) {
   const { token } = await params;
-  if (!(await currentUser())) redirect(`/entrar?next=/panel/${token}`);
+  const user = await currentUser();
   const { session_id } = await searchParams;
   let inv = await ownedInvitation(token);
+  // Sin sesión solo se abren borradores sin dueño; para el resto hay que entrar
+  if (!inv && !user) redirect(`/entrar?next=/panel/${token}`);
   if (!inv) notFound();
 
   // Vuelta de Stripe: se comprueba el pago contra Stripe, no se confía en la URL
@@ -33,5 +35,5 @@ export default async function Panel({ params, searchParams }: Props) {
   const origin =
     process.env.SITE_URL ?? `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host") ?? "localhost:3000"}`;
 
-  return <Editor initial={inv} rsvps={listRsvps(inv.slug)} guestPhotos={listGuestPhotos(inv.slug)} demoPayments={demoPayments} origin={origin} />;
+  return <Editor initial={inv} rsvps={listRsvps(inv.slug)} guestPhotos={listGuestPhotos(inv.slug)} demoPayments={demoPayments} origin={origin} guest={!user} />;
 }

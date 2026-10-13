@@ -34,9 +34,16 @@ La web guarda los datos en un archivo SQLite y las fotos en disco, así que nece
 
 1. En railway.com: New Project → Deploy from GitHub repo → este repositorio.
 2. En el servicio: Settings → Volumes → añadir un volumen montado en `/data`.
-3. Variables: `DATA_DIR=/data`, `SITE_URL=https://tu-dominio`, y las de Stripe y Resend de `.env.example`.
+3. Variables: `DATA_DIR=/data`, `SITE_URL=https://tu-dominio`, `ADMIN_EMAIL=tu-correo`, y las de Stripe y Resend de `.env.example`.
 4. Settings → Networking → Generate Domain (o conectar tu dominio).
 5. En Stripe: Developers → Webhooks → añadir `https://tu-dominio/api/stripe/webhook` con el evento `checkout.session.completed`, y copiar su secreto a `STRIPE_WEBHOOK_SECRET`.
+
+## Ventas
+
+- **Estadísticas**: regístrate en la web con el correo de `ADMIN_EMAIL` y abre `/cuenta/estadisticas`. Muestra cuánta gente pasa por cada paso hasta pagar.
+- **Códigos de descuento**: se crean en Stripe (Productos → Cupones → código promocional). En la página de pago aparece la casilla para escribirlo, y Stripe indica cuántas ventas trae cada código.
+- **Recordatorio**: quien deja una invitación en borrador recibe un único correo a los 2 días (necesita Resend y `SITE_URL`).
+- Se puede probar el editor sin cuenta; esos borradores se borran a los 7 días si nadie los guarda.
 
 ## Dónde tocar
 

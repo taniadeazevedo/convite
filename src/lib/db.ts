@@ -69,6 +69,16 @@ function getDb(): DatabaseSync {
   addColumn("invitations", "paid_at", "TEXT");
   addColumn("invitations", "expiry_notified", "INTEGER NOT NULL DEFAULT 0");
   addColumn("rsvps", "reply_key", "TEXT");
+  addColumn("invitations", "reminded", "INTEGER NOT NULL DEFAULT 0");
+  // Contadores diarios del embudo de ventas (sin datos personales): un número por día y por paso
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS stats (
+      day TEXT NOT NULL,
+      event TEXT NOT NULL,
+      n INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (day, event)
+    );
+  `);
   return db;
 }
 
@@ -108,7 +118,8 @@ function toInvitation(r: Row): Invitation {
   };
 }
 
-export function createInvitation(template: TemplateId, userId: number): Invitation {
+// userId es null cuando alguien empieza a probar sin cuenta: el borrador se le asigna al registrarse
+export function createInvitation(template: TemplateId, userId: number | null): Invitation {
   const slug = randomBytes(5).toString("hex");
   const token = randomBytes(24).toString("hex");
   const now = new Date().toISOString();
@@ -135,9 +146,11 @@ export function saveInvitation(token: string, template: TemplateId, data: Invita
 }
 
 export function markPaid(token: string) {
-  getDb()
-    .prepare("UPDATE invitations SET paid = 1, paid_at = COALESCE(paid_at, ?) WHERE token = ?")
+  const res = getDb()
+    .prepare("UPDATE invitations SET paid = 1, paid_at = COALESCE(paid_at, ?) WHERE token = ? AND paid = 0")
     .run(new Date().toISOString(), token);
+  // El aviso de Stripe y la vuelta del pago llegan los dos: la venta se cuenta solo una vez
+  if (res.changes > 0) addStat("venta");
 }
 
 // Guarda una respuesta. Si llega con la misma clave que una anterior (mismo invitado, mismo navegador),
@@ -293,6 +306,42 @@ export function listPaidBefore(iso: string, onlyNotNotified: boolean): Invitatio
     .prepare(`SELECT * FROM invitations WHERE paid = 1 AND paid_at < ?${onlyNotNotified ? " AND expiry_notified = 0" : ""}`)
     .all(iso) as Row[];
   return rows.map(toInvitation);
+}
+
+// Borradores sin pagar, con dueño, creados entre dos fechas y a los que aún no se ha enviado el recordatorio
+export function listDraftsToRemind(fromIso: string, toIso: string): Invitation[] {
+  const rows = getDb()
+    .prepare("SELECT * FROM invitations WHERE paid = 0 AND reminded = 0 AND user_id IS NOT NULL AND created_at BETWEEN ? AND ?")
+    .all(fromIso, toIso) as Row[];
+  return rows.map(toInvitation);
+}
+
+export function markReminded(slug: string) {
+  getDb().prepare("UPDATE invitations SET reminded = 1 WHERE slug = ?").run(slug);
+}
+
+// Borradores de prueba que nadie llegó a guardar en una cuenta
+export function listAnonymousDraftsBefore(iso: string): Invitation[] {
+  const rows = getDb()
+    .prepare("SELECT * FROM invitations WHERE paid = 0 AND user_id IS NULL AND created_at < ?")
+    .all(iso) as Row[];
+  return rows.map(toInvitation);
+}
+
+// --- Estadísticas del embudo
+
+export function addStat(event: string) {
+  getDb()
+    .prepare("INSERT INTO stats (day, event, n) VALUES (?, ?, 1) ON CONFLICT(day, event) DO UPDATE SET n = n + 1")
+    .run(new Date().toISOString().slice(0, 10), event);
+}
+
+export function listStats(sinceDay: string): { day: string; event: string; n: number }[] {
+  return getDb().prepare("SELECT day, event, n FROM stats WHERE day >= ? ORDER BY day DESC").all(sinceDay) as {
+    day: string;
+    event: string;
+    n: number;
+  }[];
 }
 
 export function markExpiryNotified(slug: string) {

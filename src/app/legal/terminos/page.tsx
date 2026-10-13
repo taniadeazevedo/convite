@@ -18,7 +18,8 @@ export default function Page() {
       </p>
       <H>2. Cuenta</H>
       <p>
-        Para crear una invitación hace falta una cuenta con correo y contraseña. Cada usuario es responsable de
+        Se puede probar el editor sin registrarse; para guardar y publicar una invitación hace falta una cuenta
+        con correo y contraseña. Los borradores creados sin cuenta se eliminan a los 7 días. Cada usuario es responsable de
         custodiar su contraseña y de la veracidad de sus datos.
       </p>
       <H>3. Precio y pago</H>

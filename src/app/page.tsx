@@ -2,6 +2,8 @@ import Link from "next/link";
 import TemplateCard from "@/components/TemplateCard";
 import TemplatePhone from "@/components/TemplatePhone";
 import { LEGAL_LINKS } from "@/components/LegalPage";
+import { LEGAL } from "@/lib/legal";
+import { trackVisit } from "@/lib/stats";
 import { countInvitations } from "@/lib/db";
 import { REVIEWS } from "@/lib/reviews";
 import { BRAND, PRICE_LABEL, SAMPLE_PHOTOS, TEMPLATES } from "@/lib/templates";
@@ -56,7 +58,8 @@ const FAQ = [
   ["¿Mis invitados necesitan instalar algo?", "No. Abren un enlace en el móvil y listo."],
   ["¿Puedo quitar secciones que no necesito?", "Sí, cada sección tiene un interruptor. Si no hay autobuses o no queréis lista de regalos, se oculta."],
   ["¿Cómo se paga?", `Con tarjeta, en una página segura de Stripe, justo cuando decidís publicarla. Son ${PRICE_LABEL} una sola vez, sin suscripción.`],
-  ["¿Necesito una cuenta?", "Sí, con vuestro correo y una contraseña. Así la invitación queda guardada y podéis volver a entrar cuando queráis para editarla o ver quién ha confirmado."],
+  ["¿Necesito una cuenta?", "Para probar, no: elegís diseño y empezáis a escribir sin registraros. La cuenta (correo y contraseña) se pide al guardarla o publicarla, para que podáis volver a entrar, editarla y ver quién ha confirmado."],
+  ["¿Quién está detrás?", `${BRAND} es un proyecto pequeño hecho en España. Si tenéis cualquier duda antes o después de publicar, escribid a ${LEGAL.email} y os responde una persona.`],
 ];
 
 function Img({ i, className }: { i: number; className: string }) {
@@ -70,7 +73,8 @@ export const dynamic = "force-dynamic";
 // A partir de cuántas invitaciones creadas se enseña la cifra
 const MIN_TO_SHOW = 25;
 
-export default function Home() {
+export default async function Home() {
+  await trackVisit("portada");
   const couples = countInvitations();
   return (
     <main className="overflow-x-clip">
@@ -110,7 +114,7 @@ export default function Home() {
               Ver los 10 diseños
             </a>
           </div>
-          <p className="mt-4 text-sm text-soft">Solo pagas al publicarla · {PRICE_LABEL} pago único</p>
+          <p className="mt-4 text-sm text-soft">Sin registro para probar · Solo pagas al publicarla · {PRICE_LABEL} pago único</p>
           {/* Cifra real: sale sola cuando haya suficientes invitaciones creadas */}
           {couples >= MIN_TO_SHOW && (
             <div className="mt-6 flex items-center justify-center gap-3 lg:justify-start">
@@ -284,6 +288,12 @@ export default function Home() {
             </Link>
           ))}
         </nav>
+        <p className="mb-3">
+          ¿Dudas? Escríbenos a{" "}
+          <a href={`mailto:${LEGAL.email}`} className="underline">
+            {LEGAL.email}
+          </a>
+        </p>
         © {new Date().getFullYear()} {BRAND} · Fotos de ejemplo de Unsplash
       </footer>
     </main>

@@ -5,6 +5,7 @@ import LogoutButton from "@/components/LogoutButton";
 import { currentUser } from "@/lib/auth";
 import { dailyCleanup } from "@/lib/cleanup";
 import { countRsvps, listByUser } from "@/lib/db";
+import { isAdmin } from "@/lib/stats";
 import { BRAND, formatDate, getTemplate } from "@/lib/templates";
 
 export const metadata = { title: `Mi cuenta · ${BRAND}`, robots: { index: false } };
@@ -19,6 +20,11 @@ export default async function Cuenta() {
       <header className="flex items-center justify-between">
         <Link href="/" className="font-serif text-3xl italic">{BRAND}</Link>
         <div className="flex items-center gap-4">
+          {isAdmin(user.email) && (
+            <Link href="/cuenta/estadisticas" className="text-sm underline">
+              Estadísticas
+            </Link>
+          )}
           <span className="hidden text-sm text-soft sm:inline">{user.email}</span>
           <LogoutButton />
         </div>

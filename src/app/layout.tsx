@@ -31,9 +31,13 @@ const mono = Space_Mono({ variable: "--font-mono", subsets: ["latin"], weight: [
 const syne = Syne({ variable: "--font-syne", subsets: ["latin"], weight: ["700", "800"], preload: false });
 
 export const metadata: Metadata = {
+  // Dirección pública de la web: la necesitan las imágenes que se muestran al compartir un enlace
+  metadataBase: new URL(process.env.SITE_URL ?? "http://localhost:3000"),
   title: `${BRAND} · Invitaciones de boda digitales`,
   description:
     "Crea tu invitación de boda web en minutos: elige diseño, rellena vuestros datos y recibe las confirmaciones de asistencia.",
+  openGraph: { siteName: BRAND, locale: "es_ES", type: "website" },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

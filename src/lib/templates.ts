@@ -1,6 +1,6 @@
 export const BRAND = "Invitalia";
-export const PRICE_CENTS = 2900;
-export const PRICE_LABEL = "29 €";
+export const PRICE_CENTS = 3400;
+export const PRICE_LABEL = "34 €";
 export const MAX_PHOTOS = 6;
 export const GUEST_PHOTO_LIMIT = 30; // fotos que pueden subir los invitados por boda
 

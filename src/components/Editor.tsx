@@ -17,7 +17,8 @@ import {
   type TemplateId,
 } from "@/lib/templates";
 
-type Props = { initial: Inv; rsvps: Rsvp[]; guestPhotos: string[]; demoPayments: boolean; origin: string };
+// guest: está probando sin cuenta; puede editar, pero para publicar tiene que registrarse
+type Props = { initial: Inv; rsvps: Rsvp[]; guestPhotos: string[]; demoPayments: boolean; origin: string; guest: boolean };
 
 function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
   return (
@@ -59,7 +60,9 @@ function Group({
   );
 }
 
-export default function Editor({ initial, rsvps, guestPhotos, demoPayments, origin }: Props) {
+export default function Editor({ initial, rsvps, guestPhotos, demoPayments, origin, guest }: Props) {
+  // Tras registrarse se vuelve a este mismo panel y el borrador queda en la cuenta
+  const registerUrl = `/registro?next=${encodeURIComponent(`/panel/${initial.token}`)}`;
   const [template, setTemplate] = useState<TemplateId>(initial.template);
   const [data, setData] = useState<InvitationData>(initial.data);
   const [tab, setTab] = useState<"editar" | "confirmaciones" | "album">("editar");
@@ -171,7 +174,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
     <div className="min-h-svh">
       <header className="sticky top-0 z-20 border-b border-rule bg-paper/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3">
-          <Link href="/cuenta" className="font-serif text-2xl italic" title="Mis invitaciones">{BRAND}</Link>
+          <Link href={guest ? "/" : "/cuenta"} className="font-serif text-2xl italic" title={guest ? BRAND : "Mis invitaciones"}>{BRAND}</Link>
           <nav className="flex gap-1 rounded-full border border-rule bg-card p-1 text-sm">
             {(["editar", "confirmaciones", "album"] as const).map((id) => (
               <button
@@ -189,7 +192,12 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
           <a href={`/i/${initial.slug}`} target="_blank" className="btn-ghost px-4 py-2 text-sm">
             Ver
           </a>
-          {!initial.paid && (
+          {!initial.paid && guest && (
+            <a href={registerUrl} className="btn px-4 py-2 text-sm">
+              Guardar y publicar
+            </a>
+          )}
+          {!initial.paid && !guest && (
             <button onClick={pay} disabled={paying || !accepted} className="btn px-4 py-2 text-sm" title={accepted ? undefined : "Marca la casilla de abajo para publicar"}>
               {paying ? "Un momento…" : `Publicar · ${PRICE_LABEL}`}
             </button>
@@ -225,6 +233,17 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
                 Enviar por WhatsApp
               </a>
             </div>
+          </div>
+        ) : guest ? (
+          <div className="mb-6 rounded-2xl border border-brand bg-card p-5 text-sm">
+            <div className="font-semibold">Estáis probando sin cuenta. Lo que escribáis se va guardando en este navegador durante 7 días.</div>
+            <p className="mt-1 text-soft">
+              Cread una cuenta gratis para conservar la invitación, entrar desde cualquier dispositivo y publicarla
+              cuando queráis ({PRICE_LABEL}, pago único).
+            </p>
+            <a href={registerUrl} className="btn mt-3 px-4 py-2 text-sm">
+              Crear cuenta y guardar
+            </a>
           </div>
         ) : (
           <div className="mb-6 rounded-2xl border border-rule bg-card p-5 text-sm">

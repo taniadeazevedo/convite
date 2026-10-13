@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Invitation from "@/components/Invitation";
+import { trackVisit } from "@/lib/stats";
 import { isTemplateId, sampleData } from "@/lib/templates";
 
 // La fecha de ejemplo se calcula respecto a hoy, así que no se genera de antemano
@@ -19,6 +20,7 @@ export default async function Demo({ params, searchParams }: Props) {
   if (n1) data.name1 = n1.slice(0, 40);
   if (n2) data.name2 = n2.slice(0, 40);
   if (!isTemplateId(template)) notFound();
+  await trackVisit("demo");
   return (
     <>
       <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-rule bg-paper/95 px-4 py-3 text-sm backdrop-blur">

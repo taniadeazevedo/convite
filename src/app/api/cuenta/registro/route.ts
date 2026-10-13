@@ -1,6 +1,7 @@
 import { hashPassword, startSession, tooManyAttempts } from "@/lib/auth";
 import { createUser } from "@/lib/db";
 import { sendEmail, siteOrigin } from "@/lib/email";
+import { track } from "@/lib/stats";
 import { BRAND } from "@/lib/templates";
 
 export async function POST(req: Request) {
@@ -22,6 +23,7 @@ export async function POST(req: Request) {
   const user = createUser(email, hashPassword(password));
   if (!user) return Response.json({ error: "Ya existe una cuenta con ese correo. Entra con ella." }, { status: 409 });
   await startSession(user.id);
+  track("cuenta");
   void sendEmail({
     to: user.email,
     subject: `Bienvenidos a ${BRAND}`,

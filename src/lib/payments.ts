@@ -15,6 +15,8 @@ export async function createCheckout(token: string, origin: string): Promise<str
     // Solo tarjeta: Apple Pay y Google Pay van incluidos en "card"
     allowed_payment_method_types: ["card"],
     client_reference_id: token,
+    // Casilla «Añadir código promocional»: los códigos se crean en Stripe (Productos → Cupones)
+    allow_promotion_codes: true,
     line_items: [
       {
         quantity: 1,

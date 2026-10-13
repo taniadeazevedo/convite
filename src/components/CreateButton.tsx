@@ -17,11 +17,10 @@ export default function CreateButton({ template }: { template: string }) {
     if (res?.ok) {
       const { token } = await res.json();
       router.push(`/panel/${token}`);
-    } else if (res?.status === 401) {
-      router.push("/registro?next=/crear");
     } else {
+      const body = await res?.json().catch(() => null);
       setBusy(false);
-      alert("No se pudo crear la invitación. Inténtalo de nuevo.");
+      alert(body?.error ?? "No se pudo crear la invitación. Inténtalo de nuevo.");
     }
   }
 

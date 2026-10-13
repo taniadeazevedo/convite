@@ -54,13 +54,13 @@ export async function currentUser(): Promise<User | null> {
   return value ? getSessionUser(sessionKey(value)) : null;
 }
 
-// La invitación solo se devuelve a su dueño. Las creadas antes de que hubiera cuentas
-// se asignan a quien abre su enlace privado estando identificado.
+// La invitación solo se devuelve a su dueño. Un borrador sin dueño (alguien probando sin cuenta)
+// se puede editar con su enlace privado, y se asigna a quien lo abre estando identificado.
 export async function ownedInvitation(token: string): Promise<Invitation | null> {
   const user = await currentUser();
-  if (!user) return null;
   const inv = getByToken(token);
   if (!inv) return null;
+  if (!user) return inv.userId === null && !inv.paid ? inv : null;
   if (inv.userId === null) {
     setOwner(token, user.id);
     return { ...inv, userId: user.id };

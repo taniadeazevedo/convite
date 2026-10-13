@@ -8,12 +8,14 @@ export default function Page() {
     <LegalPage title="Política de cookies">
       <H>Qué cookies usa {BRAND}</H>
       <p>
-        Solo una cookie técnica, llamada «sesion», que mantiene iniciada tu sesión cuando entras en tu cuenta. Es
-        imprescindible para que el servicio funcione y por eso no requiere consentimiento.
+        Solo cookies técnicas: «sesion», que mantiene iniciada tu sesión cuando entras en tu cuenta, y
+        «borrador», que durante 7 días recuerda en tu navegador la invitación que empezaste sin registrarte. Son
+        imprescindibles para que el servicio funcione y por eso no requieren consentimiento.
       </p>
       <H>Cookies de terceros</H>
       <p>
-        {BRAND} no usa cookies de analítica ni de publicidad. Al pagar, la página de Stripe puede usar sus propias
+        {BRAND} no usa cookies de analítica ni de publicidad: las visitas se cuentan en el servidor, de forma
+        agregada y sin identificar a nadie. Al pagar, la página de Stripe puede usar sus propias
         cookies para procesar el pago y prevenir el fraude.
       </p>
       <H>Cambios</H>
