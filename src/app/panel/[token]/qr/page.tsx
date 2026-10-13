@@ -32,8 +32,10 @@ export default async function Page({ params }: { params: Promise<{ token: string
     process.env.SITE_URL ?? `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host") ?? "localhost:3000"}`;
   // El QR siempre en negro sobre blanco: es lo que mejor leen las cámaras
   const svg = await QRCode.toString(`${origin}/i/${inv.slug}/fotos`, { type: "svg", margin: 0, width: 230 });
-  const left = t.align === "left";
   const tall = t.hero === "arco" || t.hero === "oval";
+  const cover = inv.data.cover;
+  // Tamaño del título en % del ancho: las tipografías más anchas van algo más pequeñas, y con foto hay menos sitio
+  const titleSize = (t.hero === "pop" ? 9.5 : t.hero === "gala" ? 11 : t.hero === "revista" ? 12.5 : 14.5) - (cover ? 3 : 0);
 
   return (
     <main className="flex min-h-svh flex-col items-center gap-6 bg-neutral-200 px-4 py-8 print:block print:bg-white print:p-0">
@@ -42,51 +44,58 @@ export default async function Page({ params }: { params: Promise<{ token: string
         <PrintButton />
         <span className="text-sm text-neutral-600">Tamaño A5. En el diálogo de impresión, activa «Gráficos de fondo».</span>
       </div>
-      {/* Todas las medidas van en % del ancho del cartel (cqw), para que se vea igual en pantalla y en papel */}
-      <div
-        className={`relative flex aspect-[148/210] w-full max-w-[148mm] flex-col justify-between overflow-hidden p-[9cqw] shadow-2xl print:max-w-none print:shadow-none ${
-          left ? "items-start text-left" : "items-center text-center"
-        } ${t.grain ? "grain" : ""}`}
-        style={{ background: t.bg, color: t.text, fontFamily: t.bodyFont, containerType: "inline-size" }}
-      >
-        {t.hero === "gala" && <div className="absolute inset-[4cqw]" style={{ border: `1px solid ${t.accent}` }} />}
-        {t.hero === "boho" && (
-          <>
-            <div className="absolute -top-[12cqw] -left-[12cqw] h-[38cqw] w-[38cqw] rounded-full" style={{ background: t.accent, opacity: 0.14 }} />
-            <div className="absolute -right-[10cqw] -bottom-[10cqw] h-[32cqw] w-[32cqw] rounded-full" style={{ background: t.accent, opacity: 0.1 }} />
-          </>
-        )}
-
-        <div className={`relative flex w-full flex-col gap-[2.5cqw] ${left ? "items-start" : "items-center"}`}>
-          {inv.data.cover && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={inv.data.cover} alt="" className={`w-[19cqw] object-cover ${tall ? "h-[25cqw]" : "h-[19cqw]"} ${PHOTO_SHAPE[t.hero]}`} />
-          )}
-          <p className="text-[2.3cqw] uppercase tracking-[0.4em]" style={{ color: t.accent, fontFamily: t.labelFont }}>
-            {inv.data.name1 || "Nuestra"} & {inv.data.name2 || "boda"}
-          </p>
-          <h1
-            className={`leading-[1.02] ${t.titleClass}`}
-            style={{ fontFamily: t.titleFont, fontSize: t.hero === "pop" ? "9.5cqw" : t.hero === "gala" ? "8.5cqw" : "12cqw" }}
-          >
-            Comparte
-            <br />
-            tus fotos
-          </h1>
-        </div>
-
+      {/* El marco exterior es el «contenedor»: dentro, todas las medidas van en % de su ancho (cqw),
+          así el cartel se ve igual en pantalla y en papel. El contenedor no lleva relleno, porque las
+          unidades cqw se calculan sobre su interior y un relleno encogería todo el diseño. */}
+      <div className="w-full max-w-[148mm] shadow-2xl print:max-w-none print:shadow-none" style={{ containerType: "inline-size" }}>
         <div
-          className="relative w-[54cqw] bg-white p-[3.5cqw] [&>div>svg]:h-auto [&>div>svg]:w-full"
-          style={{ borderRadius: t.radius === "999px" || t.radius === "1.75rem" ? "5cqw" : t.radius, border: `1px solid ${t.accent}` }}
+          className={`relative flex aspect-[148/210] w-full flex-col items-center justify-between overflow-hidden px-[8cqw] py-[9cqw] text-center ${t.grain ? "grain" : ""}`}
+          style={{ background: t.bg, color: t.text, fontFamily: t.bodyFont }}
         >
-          <div dangerouslySetInnerHTML={{ __html: svg }} />
-        </div>
+          {/* Marco fino que recoge la composición */}
+          <div className="absolute inset-[3.5cqw]" style={{ border: `1px solid ${t.accent}`, opacity: 0.6, borderRadius: t.hero === "gala" || t.hero === "revista" ? 0 : "3cqw" }} />
+          {t.hero === "boho" && (
+            <>
+              <div className="absolute -top-[12cqw] -left-[12cqw] h-[42cqw] w-[42cqw] rounded-full" style={{ background: t.accent, opacity: 0.14 }} />
+              <div className="absolute -right-[10cqw] -bottom-[10cqw] h-[36cqw] w-[36cqw] rounded-full" style={{ background: t.accent, opacity: 0.1 }} />
+            </>
+          )}
 
-        <div className={`relative flex flex-col gap-[2.5cqw] ${left ? "items-start" : "items-center"}`}>
-          {!left && <Sparkle t={t} size={14} />}
-          <p className="max-w-[62cqw] text-[3.1cqw] leading-relaxed" style={{ color: t.muted }}>
-            Apunta con la cámara del móvil al código y sube las fotos que hagas hoy. ¡Queremos verlas todas!
-          </p>
+          {/* Arriba: foto (si hay), nombres y título */}
+          <div className="relative flex w-full flex-col items-center gap-[2.5cqw]">
+            {cover && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={cover} alt="" className={`w-[15cqw] object-cover ${tall ? "h-[19cqw]" : "h-[15cqw]"} ${PHOTO_SHAPE[t.hero]}`} />
+            )}
+            <p className="text-[3.2cqw] uppercase tracking-[0.35em]" style={{ color: t.accent, fontFamily: t.labelFont }}>
+              {inv.data.name1 || "Nuestra"} & {inv.data.name2 || "boda"}
+            </p>
+            <h1 className={`leading-[1.02] ${t.titleClass}`} style={{ fontFamily: t.titleFont, fontSize: `${titleSize}cqw` }}>
+              Comparte
+              <br />
+              tus fotos
+            </h1>
+          </div>
+
+          {/* Centro: el código, grande */}
+          <div
+            className="relative bg-white p-[3.5cqw] [&>div>svg]:h-auto [&>div>svg]:w-full"
+            style={{
+              width: `${cover ? 46 : 60}cqw`,
+              borderRadius: t.radius === "999px" || t.radius === "1.75rem" ? "5cqw" : t.radius,
+              border: `1px solid ${t.accent}`,
+            }}
+          >
+            <div dangerouslySetInnerHTML={{ __html: svg }} />
+          </div>
+
+          {/* Abajo: instrucciones */}
+          <div className="relative flex flex-col items-center gap-[2cqw]">
+            <Sparkle t={t} size={16} />
+            <p className="max-w-[76cqw] leading-snug" style={{ color: t.muted, fontSize: `${cover ? 3.5 : 3.8}cqw` }}>
+              Apunta con la cámara del móvil al código y sube las fotos que hagas hoy. ¡Queremos verlas todas!
+            </p>
+          </div>
         </div>
       </div>
     </main>

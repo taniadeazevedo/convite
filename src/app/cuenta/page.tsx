@@ -10,9 +10,11 @@ import { BRAND, formatDate, getTemplate } from "@/lib/templates";
 
 export const metadata = { title: `Mi cuenta · ${BRAND}`, robots: { index: false } };
 
-export default async function Cuenta() {
+export default async function Cuenta({ searchParams }: { searchParams: Promise<{ ver?: string }> }) {
   const user = await currentUser();
   if (!user) redirect("/entrar?next=/cuenta");
+  // La administradora entra directamente a las estadísticas; sus invitaciones siguen en /cuenta?ver=invitaciones
+  if (isAdmin(user.email) && (await searchParams).ver !== "invitaciones") redirect("/cuenta/estadisticas");
   dailyCleanup();
   const invitations = listByUser(user.id);
   return (

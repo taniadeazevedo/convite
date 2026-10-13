@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import LogoutButton from "@/components/LogoutButton";
 import { currentUser } from "@/lib/auth";
 import { listStats } from "@/lib/db";
 import { FUNNEL, firstDayOf, isAdmin } from "@/lib/stats";
@@ -31,9 +32,18 @@ export default async function Estadisticas() {
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-8">
-      <Link href="/cuenta" className="text-sm text-soft underline">
-        ← Mi cuenta
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+        <Link href="/" className="font-serif text-3xl italic">
+          {BRAND}
+        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/cuenta?ver=invitaciones" className="underline">
+            Mis invitaciones
+          </Link>
+          <span className="hidden text-soft sm:inline">{user.email}</span>
+          <LogoutButton />
+        </div>
+      </div>
       <h1 className="mt-6 font-serif text-5xl">Estadísticas</h1>
       <p className="mt-2 text-sm text-soft">
         Cada fila es un paso hacia la venta. El porcentaje indica cuántos llegan a ese paso desde el anterior: donde
