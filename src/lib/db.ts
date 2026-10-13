@@ -183,15 +183,16 @@ export function setAlias(token: string, alias: string): boolean {
 
 // Aplica un pago: publica la invitación con su plan, o la sube a Premium si ya estaba publicada.
 // El aviso de Stripe y la vuelta del pago llegan los dos, así que tiene que poder repetirse sin efecto.
-export function markPaid(token: string, plan: PlanId = "basico") {
+// Devuelve qué ha cambiado, para avisar por correo solo la primera vez: "published", "upgraded" o null.
+export function markPaid(token: string, plan: PlanId = "basico"): "published" | "upgraded" | null {
   const inv = getByToken(token);
-  if (!inv) return;
+  if (!inv) return null;
   const d = getDb();
   if (!inv.paid) {
     const res = d
       .prepare("UPDATE invitations SET paid = 1, plan = ?, paid_at = COALESCE(paid_at, ?) WHERE token = ? AND paid = 0")
       .run(plan, new Date().toISOString(), token);
-    if (res.changes === 0) return;
+    if (res.changes === 0) return null;
     // Al publicar, la invitación recibe su dirección con los nombres
     if (!inv.alias) {
       const alias = freeAlias(inv.data.name1, inv.data.name2);
@@ -199,10 +200,14 @@ export function markPaid(token: string, plan: PlanId = "basico") {
     }
     addStat("venta");
     if (plan === "premium") addStat("premium");
-  } else if (plan === "premium" && inv.plan !== "premium") {
+    return "published";
+  }
+  if (plan === "premium" && inv.plan !== "premium") {
     d.prepare("UPDATE invitations SET plan = 'premium' WHERE token = ?").run(token);
     addStat("mejora");
+    return "upgraded";
   }
+  return null;
 }
 
 // Guarda una respuesta. Si llega con la misma clave que una anterior (mismo invitado, mismo navegador),

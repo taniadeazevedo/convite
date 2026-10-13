@@ -1,4 +1,4 @@
-import { markPaid } from "@/lib/db";
+import { applyPayment } from "@/lib/publish";
 import { createCheckout, demoPayments, stripeEnabled } from "@/lib/payments";
 import { currentUser, ownedInvitation } from "@/lib/auth";
 import { track } from "@/lib/stats";
@@ -19,13 +19,13 @@ export async function POST(req: Request, ctx: { params: Promise<{ token: string 
     return Response.json({ error: "Rellena al menos los nombres y la fecha antes de publicar" }, { status: 400 });
   }
 
+  const origin = process.env.SITE_URL ?? new URL(req.url).origin;
   if (!upgrade) track("pago");
   if (stripeEnabled) {
-    const origin = process.env.SITE_URL ?? new URL(req.url).origin;
     return Response.json({ url: await createCheckout(token, origin, plan, upgrade) });
   }
   if (demoPayments) {
-    markPaid(token, plan);
+    applyPayment(token, plan, origin);
     return Response.json({ url: `/panel/${token}?pago=demo` });
   }
   return Response.json({ error: "El pago todavía no está configurado" }, { status: 503 });

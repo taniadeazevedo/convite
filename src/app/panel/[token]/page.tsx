@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import Editor from "@/components/Editor";
-import { getByToken, listGuestPhotos, listRsvps, markPaid } from "@/lib/db";
+import { getByToken, listGuestPhotos, listRsvps } from "@/lib/db";
+import { applyPayment } from "@/lib/publish";
 import { demoPayments, paidPlanOfSession, stripeEnabled } from "@/lib/payments";
 import { currentUser, ownedInvitation } from "@/lib/auth";
 
@@ -22,18 +23,18 @@ export default async function Panel({ params, searchParams }: Props) {
   if (!inv && !user) redirect(`/entrar?next=/panel/${token}`);
   if (!inv) notFound();
 
+  const h = await headers();
+  const origin =
+    process.env.SITE_URL ?? `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host") ?? "localhost:3000"}`;
+
   // Vuelta de Stripe: se comprueba el pago contra Stripe, no se confía en la URL
   if (session_id && stripeEnabled && (!inv.paid || inv.plan === "basico")) {
     const plan = await paidPlanOfSession(session_id, token).catch(() => null);
     if (plan) {
-      markPaid(token, plan);
+      applyPayment(token, plan, origin);
       inv = getByToken(token) ?? inv; // se relee para tener ya el plan y la dirección con los nombres
     }
   }
-
-  const h = await headers();
-  const origin =
-    process.env.SITE_URL ?? `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host") ?? "localhost:3000"}`;
 
   return <Editor initial={inv} rsvps={listRsvps(inv.slug)} guestPhotos={listGuestPhotos(inv.slug)} demoPayments={demoPayments} origin={origin} guest={!user} />;
 }
