@@ -35,9 +35,11 @@ export async function POST(req: Request, ctx: { params: Promise<{ slug: string }
     void sendEmail({
       to: owner.email,
       subject: `${name} ${attending ? "ha confirmado que va" : "no podrá ir"} a vuestra boda`,
+      title: attending ? "¡Una confirmación más!" : "Una respuesta nueva",
+      button: "Ver todas las confirmaciones",
       text: `${name} ${isNew ? "ha respondido" : "ha cambiado su respuesta"}: ${
         attending ? `asistirá (${guests} ${guests === 1 ? "persona" : "personas"})` : "no podrá asistir"
-      }.\n\nTodas las confirmaciones, en vuestro panel:\n${siteOrigin(req)}/panel/${inv.token}`,
+      }.\n\n${siteOrigin(req)}/panel/${inv.token}`,
     });
   }
   return Response.json({ ok: true });

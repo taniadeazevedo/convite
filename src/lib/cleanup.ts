@@ -35,7 +35,8 @@ function notifyExpiry(inv: Invitation, months: number) {
   void sendEmail({
     to: owner.email,
     subject: `Vuestra invitación de ${BRAND} se retirará en un mes`,
-    text: `Hola:\n\nLa invitación de ${inv.data.name1} y ${inv.data.name2} lleva casi ${months} meses publicada. Dentro de un mes se retirará y se borrarán sus datos, incluidas las confirmaciones y las fotos de los invitados.\n\nSi queréis conservar algo, entrad en vuestro panel y descargad la lista de confirmados y las fotos antes de esa fecha.`,
+    title: "Vuestra invitación se retira en un mes",
+    text: `La invitación de ${inv.data.name1} y ${inv.data.name2} lleva casi ${months} meses publicada. Dentro de un mes se retirará y se borrarán sus datos, incluidas las confirmaciones y las fotos de los invitados.\n\nSi queréis conservar algo, entrad en vuestro panel y descargad la lista de confirmados y las fotos antes de esa fecha.`,
   });
 }
 
@@ -67,7 +68,9 @@ export function dailyCleanup() {
         void sendEmail({
           to: owner.email,
           subject: "Vuestra invitación os está esperando",
-          text: `Hola:\n\nEmpezasteis la invitación${names} en ${BRAND} y se quedó en borrador. Sigue guardada tal como la dejasteis:\n\n${origin}/panel/${inv.token}\n\nPodéis seguir editándola gratis; solo se paga al publicarla (${PRICE_LABEL}, una vez). Si tenéis alguna duda, responded a este correo.\n\nEs el único recordatorio que os enviaremos.`,
+          title: "Os quedasteis a medias",
+          button: "Seguir con la invitación",
+          text: `Empezasteis la invitación${names} en ${BRAND} y se quedó en borrador. Sigue guardada tal como la dejasteis:\n\n${origin}/panel/${inv.token}\n\nPodéis seguir editándola gratis; solo se paga al publicarla (${PRICE_LABEL}, una vez). Si tenéis alguna duda, responded a este correo.\n\nEs el único recordatorio que os enviaremos.`,
         });
       }
     }

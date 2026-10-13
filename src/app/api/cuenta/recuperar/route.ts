@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     await sendEmail({
       to: user.email,
       subject: `Cambia tu contraseña de ${BRAND}`,
-      text: `Hola:\n\nPara elegir una contraseña nueva, abre este enlace (caduca en una hora):\n\n${siteOrigin(req)}/restablecer/${token}\n\nSi no lo has pedido tú, ignora este correo: tu contraseña sigue siendo la misma.`,
+      title: "Elige una contraseña nueva",
+      button: "Cambiar contraseña",
+      text: `Para elegir una contraseña nueva, pulsa el botón. El enlace caduca en una hora.\n\n${siteOrigin(req)}/restablecer/${token}\n\nSi no lo has pedido tú, ignora este correo: tu contraseña sigue siendo la misma.`,
     });
   }
   // Misma respuesta exista o no la cuenta, para no revelar qué correos están registrados

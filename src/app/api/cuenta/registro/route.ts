@@ -26,8 +26,10 @@ export async function POST(req: Request) {
   track("cuenta");
   void sendEmail({
     to: user.email,
-    subject: `Bienvenidos a ${BRAND}`,
-    text: `Hola:\n\nVuestra cuenta ya está creada. Desde aquí podéis crear y editar la invitación, y ver quién ha confirmado:\n\n${siteOrigin(req)}/cuenta\n\nCrear y editar es gratis; solo se paga al publicarla.`,
+    subject: `Bienvenidos a ${BRAND} 🤍`,
+    title: "¡Enhorabuena por la boda!",
+    button: "Ir a nuestra invitación",
+    text: `Vuestra cuenta de ${BRAND} ya está lista. A partir de aquí todo es sencillo: elegís un diseño, ponéis vuestros nombres, la fecha y las fotos, y veis la invitación tal cual la recibirán vuestros invitados.\n\n${siteOrigin(req)}/cuenta\n\nTres cosas que conviene saber:\n· Crear y editar es gratis, todo el tiempo que necesitéis.\n· Solo se paga al publicarla, una única vez.\n· Después podéis cambiar lo que queráis; los invitados siempre ven la última versión.`,
   });
   return Response.json({ ok: true });
 }
