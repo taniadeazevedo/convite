@@ -23,7 +23,7 @@ export default async function Crear({ searchParams }: { searchParams: Promise<{ 
       </Link>
       <h1 className="mt-8 font-serif text-5xl">Elige vuestro diseño</h1>
       <p className="mt-2 text-soft">
-        Sin registro y sin tarjeta. Podrás cambiarlo después sin perder lo que hayas escrito.
+        Sin registro y sin tarjeta. Podrás cambiarlo antes de publicarla sin perder lo que hayas escrito.
       </p>
       {resume && (
         <p className="mt-6 rounded-2xl border border-brand bg-card p-4 text-sm">

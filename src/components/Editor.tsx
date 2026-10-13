@@ -374,7 +374,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
             </button>
             <button onClick={() => setTab("editar")} className="rounded-2xl border border-rule bg-card p-5 text-left">
               <div className="font-serif text-5xl">✎</div>
-              <div className="mt-1 text-sm text-soft">Cambiad textos, fotos o diseño cuando queráis</div>
+              <div className="mt-1 text-sm text-soft">Cambiad textos, fotos y secciones cuando queráis</div>
               <div className="mt-3 text-sm font-medium underline">Editar la invitación</div>
             </button>
           </div>
@@ -474,28 +474,37 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
         ) : (
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_400px]">
             <div className={`min-w-0 space-y-4 ${mobilePreview ? "hidden lg:block" : ""}`}>
-              <section className="rounded-2xl border border-rule bg-card p-5">
-                <h2 className="font-serif text-2xl">Diseño</h2>
-                <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
-                  {TEMPLATES.map((t) => (
-                    <button
-                      key={t.id}
-                      onClick={() => setTemplate(t.id)}
-                      className={`rounded-xl border p-2 text-left text-sm ${
-                        template === t.id ? "border-brand ring-2 ring-brand/30" : "border-rule"
-                      }`}
-                    >
-                      <div
-                        className="mb-2 flex h-14 items-center justify-center rounded-lg text-xl"
-                        style={{ background: t.bg, color: t.text, fontFamily: t.titleFont, border: `1px solid ${t.line}` }}
+              {initial.paid && (
+                <p className="rounded-2xl border border-rule bg-card p-4 text-sm text-soft">
+                  <strong className="text-ink">No hay botón de guardar:</strong> lo que cambiéis se guarda solo y vuestros
+                  invitados lo ven al momento. Arriba a la derecha pone «Guardado» cuando está hecho.
+                </p>
+              )}
+              {/* El diseño se elige antes de publicar: una vez enviada la invitación, ya no se puede cambiar */}
+              {!initial.paid && (
+                <section className="rounded-2xl border border-rule bg-card p-5">
+                  <h2 className="font-serif text-2xl">Diseño</h2>
+                  <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
+                    {TEMPLATES.map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => setTemplate(t.id)}
+                        className={`rounded-xl border p-2 text-left text-sm ${
+                          template === t.id ? "border-brand ring-2 ring-brand/30" : "border-rule"
+                        }`}
                       >
-                        <span className={t.titleClass}>A & B</span>
-                      </div>
-                      {t.name}
-                    </button>
-                  ))}
-                </div>
-              </section>
+                        <div
+                          className="mb-2 flex h-14 items-center justify-center rounded-lg text-xl"
+                          style={{ background: t.bg, color: t.text, fontFamily: t.titleFont, border: `1px solid ${t.line}` }}
+                        >
+                          <span className={t.titleClass}>A & B</span>
+                        </div>
+                        {t.name}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               <Group title="Lo esencial" data={data} toggle={toggle}>
                 <div className="grid gap-3 sm:grid-cols-2">

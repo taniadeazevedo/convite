@@ -8,7 +8,8 @@ export async function PUT(req: Request, ctx: { params: Promise<{ token: string }
   const inv = await ownedInvitation(token);
   if (!inv) return Response.json({ error: "No encontrada" }, { status: 404 });
   const body = await req.json().catch(() => null);
-  const template = isTemplateId(body?.template) ? body.template : inv.template;
+  // Una vez publicada, el diseño queda fijado: solo se puede cambiar el contenido
+  const template = !inv.paid && isTemplateId(body?.template) ? body.template : inv.template;
   const data = sanitizeData(body?.data, inv.data);
   saveInvitation(token, template, data);
   return Response.json({ template, data });

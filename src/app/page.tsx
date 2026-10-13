@@ -11,7 +11,7 @@ import { BRAND, PLANS, PRICE_LABEL, SAMPLE_PHOTOS, TEMPLATES } from "@/lib/templ
 const photo = (i: number) => SAMPLE_PHOTOS[i % SAMPLE_PHOTOS.length];
 
 const STEPS = [
-  ["Elige un diseño", "Diez estilos distintos. Puedes cambiarlo cuando quieras sin perder nada."],
+  ["Elige un diseño", "Diez estilos distintos. Puedes cambiarlo las veces que quieras antes de publicarla, sin perder nada."],
   ["Rellena vuestros datos", "Nombres, fecha, lugares, fotos… y oculta las secciones que no necesitéis."],
   ["Comparte el enlace", "Por WhatsApp o donde queráis. Las confirmaciones llegan a vuestro panel."],
 ];
@@ -55,7 +55,7 @@ const INCLUDES = [
 
 const FAQ = [
   ["¿Puedo probarlo antes de pagar?", "Sí. Creas y editas la invitación gratis, la ves tal cual quedará, y solo pagas cuando quieras publicarla."],
-  ["¿Puedo cambiar cosas después de publicarla?", "Todas las veces que quieras, sin coste. Los cambios se ven al momento."],
+  ["¿Puedo cambiar cosas después de publicarla?", "Sí: textos, fechas, lugares, fotos y secciones, todas las veces que quieras y sin coste. Los cambios se ven al momento. Lo único que queda fijado al publicar es el diseño."],
   ["¿Mis invitados necesitan instalar algo?", "No. Abren un enlace en el móvil y listo."],
   ["¿Puedo quitar secciones que no necesito?", "Sí, cada sección tiene un interruptor. Si no hay autobuses o no queréis lista de regalos, se oculta."],
   ["¿Cómo se paga?", `Con tarjeta, en una página segura de Stripe, justo cuando decidís publicarla. Son ${PLANS.basico.label} (o ${PLANS.premium.label} en Premium) una sola vez, sin suscripción.`],
