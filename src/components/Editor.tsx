@@ -66,7 +66,11 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
   const registerUrl = `/registro?next=${encodeURIComponent(`/panel/${initial.token}`)}`;
   const [template, setTemplate] = useState<TemplateId>(initial.template);
   const [data, setData] = useState<InvitationData>(initial.data);
-  const [tab, setTab] = useState<"editar" | "confirmaciones" | "album">("editar");
+  // Publicada: se abre en «Compartir» (solo el enlace y el resumen); el formulario queda en «Editar».
+  // En borrador no hay nada que compartir todavía, así que se abre directamente el editor.
+  type Tab = "compartir" | "editar" | "confirmaciones" | "album";
+  const tabs: Tab[] = initial.paid ? ["compartir", "editar", "confirmaciones", "album"] : ["editar", "confirmaciones", "album"];
+  const [tab, setTab] = useState<Tab>(initial.paid ? "compartir" : "editar");
   const [album, setAlbum] = useState(guestPhotos);
   const [saveState, setSaveState] = useState<"saved" | "saving" | "error">("saved");
   const [uploading, setUploading] = useState(false);
@@ -207,13 +211,13 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3">
           <Link href={guest ? "/" : "/cuenta"} className="font-serif text-2xl italic" title={guest ? BRAND : "Mis invitaciones"}>{BRAND}</Link>
           <nav className="flex gap-1 rounded-full border border-rule bg-card p-1 text-sm">
-            {(["editar", "confirmaciones", "album"] as const).map((id) => (
+            {tabs.map((id) => (
               <button
                 key={id}
                 onClick={() => setTab(id)}
                 className={`rounded-full px-3 py-1.5 font-medium ${tab === id ? "bg-ink text-white" : "text-soft"}`}
               >
-                {id === "editar" ? "Editar" : id === "album" ? `Fotos de invitados (${album.length})` : `Confirmaciones (${rsvps.length})`}
+                {id === "compartir" ? "Compartir" : id === "editar" ? "Editar" : id === "album" ? `Fotos de invitados (${album.length})` : `Confirmaciones (${rsvps.length})`}
               </button>
             ))}
           </nav>
@@ -238,6 +242,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
 
       <div className="mx-auto max-w-7xl px-4 pt-6 pb-24 lg:pb-6">
         {initial.paid ? (
+          tab === "compartir" && (
           <div className="mb-6 rounded-2xl border border-rule bg-card p-5">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <div className="font-semibold">Publicada. Este es el enlace para vuestros invitados:</div>
@@ -297,6 +302,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
               </div>
             )}
           </div>
+          )
         ) : guest ? (
           <div className="mb-6 rounded-2xl border border-brand bg-card p-5 text-sm">
             <div className="font-semibold">Estáis probando sin cuenta. Lo que escribáis se va guardando en este navegador durante 7 días.</div>
@@ -352,7 +358,27 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
           </div>
         )}
 
-        {tab === "album" ? (
+        {tab === "compartir" ? (
+          <div className="grid gap-4 sm:grid-cols-3">
+            <button onClick={() => setTab("confirmaciones")} className="rounded-2xl border border-rule bg-card p-5 text-left">
+              <div className="font-serif text-5xl">{going.length}</div>
+              <div className="mt-1 text-sm text-soft">
+                {going.length === 1 ? "confirmación" : "confirmaciones"} · {totalGuests} {totalGuests === 1 ? "persona" : "personas"}
+              </div>
+              <div className="mt-3 text-sm font-medium underline">Ver quién viene</div>
+            </button>
+            <button onClick={() => setTab("album")} className="rounded-2xl border border-rule bg-card p-5 text-left">
+              <div className="font-serif text-5xl">{album.length}</div>
+              <div className="mt-1 text-sm text-soft">{album.length === 1 ? "foto de invitados" : "fotos de invitados"}</div>
+              <div className="mt-3 text-sm font-medium underline">Ver el álbum y el cartel con QR</div>
+            </button>
+            <button onClick={() => setTab("editar")} className="rounded-2xl border border-rule bg-card p-5 text-left">
+              <div className="font-serif text-5xl">✎</div>
+              <div className="mt-1 text-sm text-soft">Cambiad textos, fotos o diseño cuando queráis</div>
+              <div className="mt-3 text-sm font-medium underline">Editar la invitación</div>
+            </button>
+          </div>
+        ) : tab === "album" ? (
           <div className="rounded-2xl border border-rule bg-card p-5">
             <h2 className="font-serif text-3xl">Fotos de vuestros invitados</h2>
             <p className="mt-1 max-w-2xl text-sm text-soft">
