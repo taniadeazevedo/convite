@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { currentUser } from "@/lib/auth";
 import { listStats } from "@/lib/db";
 import { FUNNEL, firstDayOf, isAdmin } from "@/lib/stats";
-import { BRAND, PRICE_CENTS } from "@/lib/templates";
+import { BRAND, PLANS, UPGRADE_CENTS } from "@/lib/templates";
 
 export const metadata = { title: `Estadísticas · ${BRAND}`, robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -23,7 +23,11 @@ export default async function Estadisticas() {
     rows.filter((r) => r.event === event && r.day >= from[days]).reduce((n, r) => n + r.n, 0);
   const days = [...new Set(rows.map((r) => r.day))];
   const cell = (day: string, event: string) => rows.find((r) => r.day === day && r.event === event)?.n ?? 0;
-  const euros = (n: number) => `${((n * PRICE_CENTS) / 100).toLocaleString("es-ES")} €`;
+  // Cada venta cuenta al precio Esencial; las Premium y las mejoras suman la diferencia
+  const revenue = (days: number) => {
+    const cents = total("venta", days) * PLANS.basico.cents + (total("premium", days) + total("mejora", days)) * UPGRADE_CENTS;
+    return `${(cents / 100).toLocaleString("es-ES")} €`;
+  };
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-8">
@@ -68,9 +72,9 @@ export default async function Estadisticas() {
       </div>
 
       <p className="mt-4 text-sm">
-        Ingresos estimados: <strong>{euros(total("venta", 7))}</strong> en 7 días ·{" "}
-        <strong>{euros(total("venta", DAYS))}</strong> en {DAYS} días (ventas × precio actual, sin descuentos ni
-        comisiones de Stripe).
+        Ingresos estimados: <strong>{revenue(7)}</strong> en 7 días · <strong>{revenue(DAYS)}</strong> en {DAYS} días
+        (a precio actual, sin descontar códigos promocionales ni comisiones de Stripe). De las ventas de {DAYS}{" "}
+        días, {total("premium", DAYS)} fueron Premium y {total("mejora", DAYS)} mejoraron después.
       </p>
 
       <h2 className="mt-10 font-serif text-3xl">Día a día</h2>

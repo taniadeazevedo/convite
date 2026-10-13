@@ -39,7 +39,7 @@ export default function Page() {
       <H>Conservación</H>
       <p>
         Los datos de una invitación se conservan mientras esté activa y se eliminan como máximo 12 meses después
-        de su publicación, o antes si el usuario lo solicita. Los datos de facturación se conservan los plazos que
+        de su publicación (24 en el plan Premium), o antes si el usuario lo solicita. Los datos de facturación se conservan los plazos que
         exige la ley.
       </p>
       <H>Derechos</H>

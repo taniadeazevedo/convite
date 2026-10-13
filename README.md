@@ -16,7 +16,7 @@ Abre http://localhost:3000. Sin `STRIPE_SECRET_KEY` (ver `.env.example`) el bot�
 - `/` landing · `/demo/[plantilla]` ejemplo de cada diseño · `/crear` elegir diseño
 - `/panel/[token]` panel privado de la pareja (editar, confirmaciones, fotos de invitados)
 - `/panel/[token]/qr` cartel imprimible con QR
-- `/i/[slug]` invitación pública · `/i/[slug]/fotos` subida de fotos de invitados
+- `/lucia-y-marcos` invitación pública con los nombres (se asigna al publicar; `/i/[slug]` sigue funcionando) · `/i/[slug]/fotos` subida de fotos de invitados
 
 ## Cuentas
 
@@ -38,7 +38,20 @@ La web guarda los datos en un archivo SQLite y las fotos en disco, así que nece
 4. Settings → Networking → Generate Domain (o conectar tu dominio).
 5. En Stripe: Developers → Webhooks → añadir `https://tu-dominio/api/stripe/webhook` con el evento `checkout.session.completed`, y copiar su secreto a `STRIPE_WEBHOOK_SECRET`.
 
+## Correos (Resend)
+
+El código ya envía los correos con Resend en cuanto encuentra las dos variables. Pasos:
+
+1. Crea una cuenta en resend.com.
+2. Domains → Add Domain → tu dominio (por ejemplo `invitalia.es`) y copia los registros DNS que te da en el panel donde compraste el dominio. Espera a que salga «Verified».
+3. API Keys → Create API Key → copia la clave.
+4. En Railway → tu servicio → Variables: `RESEND_API_KEY` = la clave, `EMAIL_FROM` = `Invitalia <hola@invitalia.es>` (con tu dominio verificado).
+
+Sin dominio propio verificado, Resend solo deja enviar a tu propio correo.
+
 ## Ventas
+
+- **Planes**: Esencial y Premium se eligen al publicar; una invitación Esencial puede pasar a Premium pagando la diferencia.
 
 - **Estadísticas**: regístrate en la web con el correo de `ADMIN_EMAIL` y abre `/cuenta/estadisticas`. Muestra cuánta gente pasa por cada paso hasta pagar.
 - **Códigos de descuento**: se crean en Stripe (Productos → Cupones → código promocional). En la página de pago aparece la casilla para escribirlo, y Stripe indica cuántas ventas trae cada código.
@@ -47,6 +60,7 @@ La web guarda los datos en un archivo SQLite y las fotos en disco, así que nece
 
 ## Dónde tocar
 
-- Nombre de marca, precio y plantillas: `src/lib/templates.ts`
+- Nombre de marca, planes (precios y límites) y plantillas: `src/lib/templates.ts`
+- Opiniones de la portada: `src/lib/reviews.ts`
 - Diseño de la invitación: `src/components/Invitation.tsx`
 - Los datos (SQLite y fotos) se guardan en `data/`, que no se sube a git.

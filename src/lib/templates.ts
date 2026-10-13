@@ -1,8 +1,20 @@
 export const BRAND = "Invitalia";
-export const PRICE_CENTS = 3400;
-export const PRICE_LABEL = "34 €";
-export const MAX_PHOTOS = 6;
-export const GUEST_PHOTO_LIMIT = 30; // fotos que pueden subir los invitados por boda
+// Planes. Para cambiar precios o límites solo hay que tocar esta tabla.
+export const PLANS = {
+  basico: { name: "Esencial", cents: 3400, label: "34 €", photos: 6, guestPhotos: 30, months: 12 },
+  premium: { name: "Premium", cents: 4900, label: "49 €", photos: 15, guestPhotos: 150, months: 24 },
+} as const;
+export type PlanId = keyof typeof PLANS;
+export const isPlanId = (v: unknown): v is PlanId => typeof v === "string" && v in PLANS;
+// Pasar de Esencial a Premium con la invitación ya publicada cuesta la diferencia
+export const UPGRADE_CENTS = PLANS.premium.cents - PLANS.basico.cents;
+export const UPGRADE_LABEL = `${UPGRADE_CENTS / 100} €`;
+
+// Precio de entrada, el que se anuncia como «desde»
+export const PRICE_CENTS = PLANS.basico.cents;
+export const PRICE_LABEL = PLANS.basico.label;
+export const MAX_PHOTOS = PLANS.basico.photos;
+export const GUEST_PHOTO_LIMIT = PLANS.basico.guestPhotos; // fotos que pueden subir los invitados por boda
 
 export type TemplateId =
   | "lino"

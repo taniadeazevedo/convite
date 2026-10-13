@@ -2,7 +2,8 @@ import { DatabaseSync } from "node:sqlite";
 import { randomBytes } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { emptyData, type InvitationData, type TemplateId } from "./templates";
+import { aliasFromNames, isValidAlias } from "./alias";
+import { emptyData, isPlanId, type InvitationData, type PlanId, type TemplateId } from "./templates";
 
 // En el servidor, DATA_DIR apunta al disco permanente
 export const DATA_DIR = process.env.DATA_DIR || path.join(/*turbopackIgnore: true*/ process.cwd(), "data");
@@ -70,6 +71,9 @@ function getDb(): DatabaseSync {
   addColumn("invitations", "expiry_notified", "INTEGER NOT NULL DEFAULT 0");
   addColumn("rsvps", "reply_key", "TEXT");
   addColumn("invitations", "reminded", "INTEGER NOT NULL DEFAULT 0");
+  addColumn("invitations", "alias", "TEXT"); // dirección con los nombres: /lucia-y-marcos
+  addColumn("invitations", "plan", "TEXT"); // "basico" o "premium"; vacío hasta que se publica
+  db.exec("CREATE UNIQUE INDEX IF NOT EXISTS invitations_alias ON invitations(alias)");
   // Contadores diarios del embudo de ventas (sin datos personales): un número por día y por paso
   db.exec(`
     CREATE TABLE IF NOT EXISTS stats (
@@ -91,6 +95,9 @@ export type Invitation = {
   visits: number;
   userId: number | null;
   createdAt: string;
+  // Dirección pública con los nombres (se asigna al publicar) y plan contratado
+  alias: string | null;
+  plan: PlanId;
 };
 
 export type Rsvp = {
@@ -115,6 +122,8 @@ function toInvitation(r: Row): Invitation {
     visits: r.visits as number,
     userId: (r.user_id as number | null) ?? null,
     createdAt: r.created_at as string,
+    alias: (r.alias as string | null) ?? null,
+    plan: isPlanId(r.plan) ? r.plan : "basico",
   };
 }
 
@@ -126,7 +135,7 @@ export function createInvitation(template: TemplateId, userId: number | null): I
   getDb()
     .prepare("INSERT INTO invitations (slug, token, template, data, created_at, user_id) VALUES (?, ?, ?, ?, ?, ?)")
     .run(slug, token, template, JSON.stringify(emptyData()), now, userId);
-  return { slug, token, template, data: emptyData(), paid: false, visits: 0, userId, createdAt: now };
+  return { slug, token, template, data: emptyData(), paid: false, visits: 0, userId, createdAt: now, alias: null, plan: "basico" };
 }
 
 export function getByToken(token: string): Invitation | null {
@@ -145,12 +154,55 @@ export function saveInvitation(token: string, template: TemplateId, data: Invita
     .run(template, JSON.stringify(data), token);
 }
 
-export function markPaid(token: string) {
-  const res = getDb()
-    .prepare("UPDATE invitations SET paid = 1, paid_at = COALESCE(paid_at, ?) WHERE token = ? AND paid = 0")
-    .run(new Date().toISOString(), token);
-  // El aviso de Stripe y la vuelta del pago llegan los dos: la venta se cuenta solo una vez
-  if (res.changes > 0) addStat("venta");
+export function getByAlias(alias: string): Invitation | null {
+  const r = getDb().prepare("SELECT * FROM invitations WHERE alias = ?").get(alias) as Row | undefined;
+  return r ? toInvitation(r) : null;
+}
+
+// Primera dirección libre a partir de los nombres: lucia-y-marcos, lucia-y-marcos-2, lucia-y-marcos-3…
+function freeAlias(name1: string, name2: string): string | null {
+  const base = aliasFromNames(name1, name2);
+  if (!base) return null;
+  const taken = getDb().prepare("SELECT 1 FROM invitations WHERE alias = ?");
+  for (let i = 1; i < 500; i++) {
+    const candidate = i === 1 ? base : `${base.slice(0, 36)}-${i}`;
+    if (isValidAlias(candidate) && !taken.get(candidate)) return candidate;
+  }
+  return null;
+}
+
+// Cambia la dirección (plan Premium). Devuelve false si ya la usa otra invitación.
+export function setAlias(token: string, alias: string): boolean {
+  try {
+    getDb().prepare("UPDATE invitations SET alias = ? WHERE token = ?").run(alias, token);
+    return true;
+  } catch {
+    return false; // el índice único impide repetir direcciones
+  }
+}
+
+// Aplica un pago: publica la invitación con su plan, o la sube a Premium si ya estaba publicada.
+// El aviso de Stripe y la vuelta del pago llegan los dos, así que tiene que poder repetirse sin efecto.
+export function markPaid(token: string, plan: PlanId = "basico") {
+  const inv = getByToken(token);
+  if (!inv) return;
+  const d = getDb();
+  if (!inv.paid) {
+    const res = d
+      .prepare("UPDATE invitations SET paid = 1, plan = ?, paid_at = COALESCE(paid_at, ?) WHERE token = ? AND paid = 0")
+      .run(plan, new Date().toISOString(), token);
+    if (res.changes === 0) return;
+    // Al publicar, la invitación recibe su dirección con los nombres
+    if (!inv.alias) {
+      const alias = freeAlias(inv.data.name1, inv.data.name2);
+      if (alias) setAlias(token, alias);
+    }
+    addStat("venta");
+    if (plan === "premium") addStat("premium");
+  } else if (plan === "premium" && inv.plan !== "premium") {
+    d.prepare("UPDATE invitations SET plan = 'premium' WHERE token = ?").run(token);
+    addStat("mejora");
+  }
 }
 
 // Guarda una respuesta. Si llega con la misma clave que una anterior (mismo invitado, mismo navegador),
@@ -301,10 +353,12 @@ export function deleteUserRows(userId: number) {
 }
 
 // Invitaciones publicadas antes de una fecha (para el aviso y el borrado a los 12 meses)
-export function listPaidBefore(iso: string, onlyNotNotified: boolean): Invitation[] {
+export function listPaidBefore(iso: string, onlyNotNotified: boolean, plan: PlanId): Invitation[] {
   const rows = getDb()
-    .prepare(`SELECT * FROM invitations WHERE paid = 1 AND paid_at < ?${onlyNotNotified ? " AND expiry_notified = 0" : ""}`)
-    .all(iso) as Row[];
+    .prepare(
+      `SELECT * FROM invitations WHERE paid = 1 AND paid_at < ? AND COALESCE(plan, 'basico') = ?${onlyNotNotified ? " AND expiry_notified = 0" : ""}`,
+    )
+    .all(iso, plan) as Row[];
   return rows.map(toInvitation);
 }
 

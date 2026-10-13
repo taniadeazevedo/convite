@@ -6,7 +6,7 @@ import { LEGAL } from "@/lib/legal";
 import { trackVisit } from "@/lib/stats";
 import { countInvitations } from "@/lib/db";
 import { REVIEWS } from "@/lib/reviews";
-import { BRAND, PRICE_LABEL, SAMPLE_PHOTOS, TEMPLATES } from "@/lib/templates";
+import { BRAND, PLANS, PRICE_LABEL, SAMPLE_PHOTOS, TEMPLATES } from "@/lib/templates";
 
 const photo = (i: number) => SAMPLE_PHOTOS[i % SAMPLE_PHOTOS.length];
 
@@ -38,6 +38,7 @@ const FEATURES = [
 ];
 
 const INCLUDES = [
+  "Dirección con vuestros nombres",
   "Cuenta atrás hasta el gran día",
   "Lugares y horarios con botón a Google Maps",
   "Confirmación de asistencia con alergias y acompañantes",
@@ -57,7 +58,7 @@ const FAQ = [
   ["¿Puedo cambiar cosas después de publicarla?", "Todas las veces que quieras, sin coste. Los cambios se ven al momento."],
   ["¿Mis invitados necesitan instalar algo?", "No. Abren un enlace en el móvil y listo."],
   ["¿Puedo quitar secciones que no necesito?", "Sí, cada sección tiene un interruptor. Si no hay autobuses o no queréis lista de regalos, se oculta."],
-  ["¿Cómo se paga?", `Con tarjeta, en una página segura de Stripe, justo cuando decidís publicarla. Son ${PRICE_LABEL} una sola vez, sin suscripción.`],
+  ["¿Cómo se paga?", `Con tarjeta, en una página segura de Stripe, justo cuando decidís publicarla. Son ${PLANS.basico.label} (o ${PLANS.premium.label} en Premium) una sola vez, sin suscripción.`],
   ["¿Necesito una cuenta?", "Para probar, no: elegís diseño y empezáis a escribir sin registraros. La cuenta (correo y contraseña) se pide al guardarla o publicarla, para que podáis volver a entrar, editarla y ver quién ha confirmado."],
   ["¿Quién está detrás?", `${BRAND} es un proyecto pequeño hecho en España. Si tenéis cualquier duda antes o después de publicar, escribid a ${LEGAL.email} y os responde una persona.`],
 ];
@@ -114,7 +115,7 @@ export default async function Home() {
               Ver los 10 diseños
             </a>
           </div>
-          <p className="mt-4 text-sm text-soft">Sin registro para probar · Solo pagas al publicarla · {PRICE_LABEL} pago único</p>
+          <p className="mt-4 text-sm text-soft">Sin registro para probar · Solo pagas al publicarla · desde {PRICE_LABEL}, pago único</p>
           {/* Cifra real: sale sola cuando haya suficientes invitaciones creadas */}
           {couples >= MIN_TO_SHOW && (
             <div className="mt-6 flex items-center justify-center gap-3 lg:justify-start">
@@ -216,14 +217,18 @@ export default async function Home() {
       {REVIEWS.length > 0 && (
         <section className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-center font-serif text-5xl">Lo que dicen las parejas</h2>
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
+          <p className="mt-3 text-center text-sm text-soft">
+            Opiniones de parejas a las que hicimos su web de boda antes de lanzar {BRAND}.
+          </p>
+          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {REVIEWS.map((r) => (
               <figure key={r.name} className="rounded-3xl border border-rule bg-card p-7">
                 <div className="text-brand">★★★★★</div>
-                <blockquote className="mt-3 font-serif text-2xl leading-snug">«{r.text}»</blockquote>
-                <figcaption className="mt-4 text-sm text-soft">
-                  {r.name} · {r.place}
-                </figcaption>
+                <blockquote className="mt-3">
+                  <p className="font-serif text-2xl leading-snug">«{r.title}»</p>
+                  <p className="mt-2 text-soft">{r.text}</p>
+                </blockquote>
+                <figcaption className="mt-4 text-sm font-medium">{r.name}</figcaption>
               </figure>
             ))}
           </div>
@@ -245,13 +250,42 @@ export default async function Home() {
             </ul>
           </div>
           <div className="flex flex-col items-center justify-center border-rule sm:border-l sm:pl-12">
-            <div className="font-serif text-7xl">{PRICE_LABEL}</div>
+            <div className="text-[11px] uppercase tracking-[0.4em] text-soft">{PLANS.basico.name}</div>
+            <div className="mt-1 font-serif text-7xl">{PLANS.basico.label}</div>
             <div className="text-sm text-soft">pago único, sin suscripción</div>
             <Link href="/crear" className="btn mt-6">
               Crear la mía
             </Link>
           </div>
         </div>
+        {/* Plan Premium */}
+        <div className="mt-5 grid gap-6 rounded-[2rem] border border-brand bg-card p-8 sm:grid-cols-[1fr_auto] sm:items-center sm:p-10">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.4em] text-brand">{PLANS.premium.name}</p>
+            <h3 className="mt-2 font-serif text-4xl">Todo lo anterior, y además</h3>
+            <ul className="mt-4 grid gap-2.5 text-sm sm:grid-cols-2">
+              {[
+                "Elegís vuestra dirección (por ejemplo, /nuestra-boda)",
+                `Sin «Hecha con ${BRAND}» en la invitación`,
+                `${PLANS.premium.photos} fotos en la galería en vez de ${PLANS.basico.photos}`,
+                `${PLANS.premium.guestPhotos} fotos de invitados en vez de ${PLANS.basico.guestPhotos}`,
+                `${PLANS.premium.months} meses publicada en vez de ${PLANS.basico.months}`,
+              ].map((x) => (
+                <li key={x} className="flex gap-2">
+                  <span className="text-brand">✓</span>
+                  {x}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="text-center">
+            <div className="font-serif text-6xl">{PLANS.premium.label}</div>
+            <div className="text-sm text-soft">pago único</div>
+          </div>
+        </div>
+        <p className="mt-4 text-center text-sm text-soft">
+          El plan se elige al publicar, y podéis pasar de {PLANS.basico.name} a {PLANS.premium.name} después pagando solo la diferencia.
+        </p>
       </section>
 
       <section className="mx-auto max-w-2xl px-6 pb-20">

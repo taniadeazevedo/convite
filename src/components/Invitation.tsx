@@ -24,6 +24,8 @@ type Props = {
   mode: Mode;
   slug?: string;
   embedded?: boolean;
+  // false en el plan Premium: no se muestra «Hecha con Invitalia»
+  branding?: boolean;
 };
 
 const label = "text-[11px] uppercase tracking-[0.4em]";
@@ -371,7 +373,7 @@ function RsvpForm({ t, data, mode, slug }: { t: Template; data: InvitationData; 
   );
 }
 
-export default function Invitation({ template, data, mode, slug, embedded }: Props) {
+export default function Invitation({ template, data, mode, slug, embedded, branding = true }: Props) {
   const t = getTemplate(template);
   const name1 = data.name1 || "Nombre";
   const name2 = data.name2 || "Nombre";
@@ -553,10 +555,12 @@ export default function Invitation({ template, data, mode, slug, embedded }: Pro
           <p className={`text-3xl [overflow-wrap:anywhere] ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
             {name1} <span style={{ color: t.accent }}>&</span> {name2}
           </p>
-          <p className="mt-4 text-xs" style={{ color: t.muted }}>
-            Hecha con{" "}
-            <Link href="/" className="underline">{BRAND}</Link>
-          </p>
+          {branding && (
+            <p className="mt-4 text-xs" style={{ color: t.muted }}>
+              Hecha con{" "}
+              <Link href="/" className="underline">{BRAND}</Link>
+            </p>
+          )}
         </footer>
       </div>
     </div>

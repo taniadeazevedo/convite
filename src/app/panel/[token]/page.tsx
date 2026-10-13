@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import Editor from "@/components/Editor";
-import { listGuestPhotos, listRsvps, markPaid } from "@/lib/db";
-import { demoPayments, isSessionPaid, stripeEnabled } from "@/lib/payments";
+import { getByToken, listGuestPhotos, listRsvps, markPaid } from "@/lib/db";
+import { demoPayments, paidPlanOfSession, stripeEnabled } from "@/lib/payments";
 import { currentUser, ownedInvitation } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Tu invitación · Panel", robots: { index: false } };
@@ -23,11 +23,11 @@ export default async function Panel({ params, searchParams }: Props) {
   if (!inv) notFound();
 
   // Vuelta de Stripe: se comprueba el pago contra Stripe, no se confía en la URL
-  if (!inv.paid && session_id && stripeEnabled) {
-    const paid = await isSessionPaid(session_id, token).catch(() => false);
-    if (paid) {
-      markPaid(token);
-      inv = { ...inv, paid: true };
+  if (session_id && stripeEnabled && (!inv.paid || inv.plan === "basico")) {
+    const plan = await paidPlanOfSession(session_id, token).catch(() => null);
+    if (plan) {
+      markPaid(token, plan);
+      inv = getByToken(token) ?? inv; // se relee para tener ya el plan y la dirección con los nombres
     }
   }
 

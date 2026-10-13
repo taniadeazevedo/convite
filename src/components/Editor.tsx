@@ -6,9 +6,10 @@ import Invitation from "./Invitation";
 import type { Invitation as Inv, Rsvp } from "@/lib/db";
 import {
   BRAND,
-  GUEST_PHOTO_LIMIT,
-  MAX_PHOTOS,
+  PLANS,
   PRICE_LABEL,
+  UPGRADE_LABEL,
+  type PlanId,
   SECTIONS,
   TEMPLATES,
   type EventBlock,
@@ -74,6 +75,13 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
   // En pantallas pequeñas se alterna entre el formulario y la vista previa
   const [mobilePreview, setMobilePreview] = useState(false);
   const [copied, setCopied] = useState(false);
+  // Plan elegido para publicar; una vez publicada, el que tiene contratado
+  const [plan, setPlan] = useState<PlanId>(initial.plan);
+  const limits = PLANS[initial.paid ? initial.plan : "basico"];
+  // Dirección con los nombres (se asigna al publicar; en Premium se puede cambiar)
+  const [alias, setAlias] = useState(initial.alias ?? "");
+  const [aliasDraft, setAliasDraft] = useState(initial.alias ?? "");
+  const [aliasMsg, setAliasMsg] = useState("");
   const first = useRef(true);
   const api = `/api/panel/${initial.token}`;
 
@@ -132,9 +140,31 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
     }
   }
 
-  async function pay() {
+  async function saveAlias() {
+    setAliasMsg("Guardando…");
+    const res = await fetch(`${api}/direccion`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ alias: aliasDraft }),
+    }).catch(() => null);
+    const json = await res?.json().catch(() => null);
+    if (res?.ok && json?.alias) {
+      setAlias(json.alias);
+      setAliasDraft(json.alias);
+      setAliasMsg("Dirección cambiada. La anterior deja de funcionar.");
+    } else {
+      setAliasMsg(json?.error ?? "No se pudo cambiar la dirección");
+    }
+  }
+
+  // planToBuy: el elegido al publicar, o "premium" al mejorar una invitación ya publicada
+  async function pay(planToBuy: PlanId = plan) {
     setPaying(true);
-    const res = await fetch(`${api}/pago`, { method: "POST" }).catch(() => null);
+    const res = await fetch(`${api}/pago`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plan: planToBuy }),
+    }).catch(() => null);
     const json = await res?.json().catch(() => null);
     if (res?.ok && json?.url) {
       window.location.href = json.url;
@@ -150,7 +180,8 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
     if (res?.ok) setAlbum((a) => a.filter((f) => f !== file));
   }
 
-  const publicUrl = `${origin}/i/${initial.slug}`;
+  const publicPath = alias ? `/${alias}` : `/i/${initial.slug}`;
+  const publicUrl = `${origin}${publicPath}`;
   const going = rsvps.filter((r) => r.attending);
   const totalGuests = going.reduce((n, r) => n + r.guests, 0);
 
@@ -189,7 +220,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
           <span className="ml-auto text-xs text-soft">
             {saveState === "saving" ? "Guardando…" : saveState === "error" ? "Error al guardar" : "Guardado"}
           </span>
-          <a href={`/i/${initial.slug}`} target="_blank" className="btn-ghost px-4 py-2 text-sm">
+          <a href={publicPath} target="_blank" className="btn-ghost px-4 py-2 text-sm">
             Ver
           </a>
           {!initial.paid && guest && (
@@ -198,8 +229,8 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
             </a>
           )}
           {!initial.paid && !guest && (
-            <button onClick={pay} disabled={paying || !accepted} className="btn px-4 py-2 text-sm" title={accepted ? undefined : "Marca la casilla de abajo para publicar"}>
-              {paying ? "Un momento…" : `Publicar · ${PRICE_LABEL}`}
+            <button onClick={() => pay()} disabled={paying || !accepted} className="btn px-4 py-2 text-sm" title={accepted ? undefined : "Marca la casilla de abajo para publicar"}>
+              {paying ? "Un momento…" : `Publicar · ${PLANS[plan].label}`}
             </button>
           )}
         </div>
@@ -233,6 +264,38 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
                 Enviar por WhatsApp
               </a>
             </div>
+            {initial.plan === "premium" ? (
+              <div className="mt-4 border-t border-rule pt-4 text-sm">
+                <div className="font-semibold">Plan Premium · elegid vuestra dirección</div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className="font-mono text-soft">{origin.replace(/^https?:\/\//, "")}/</span>
+                  <input
+                    value={aliasDraft}
+                    maxLength={40}
+                    onChange={(e) => setAliasDraft(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
+                    className="field min-w-0 flex-1 font-mono text-sm"
+                    aria-label="Dirección de la invitación"
+                  />
+                  <button onClick={saveAlias} disabled={!aliasDraft || aliasDraft === alias} className="btn-ghost px-4 py-2 text-sm">
+                    Cambiar
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-soft">
+                  {aliasMsg || "Cambiadla antes de enviar la invitación: el enlace anterior deja de funcionar."}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-4 text-sm">
+                <p className="max-w-xl text-soft">
+                  <strong className="text-ink">Pasad a Premium por {UPGRADE_LABEL}:</strong> elegís la dirección, sin «Hecha con{" "}
+                  {BRAND}», hasta {PLANS.premium.photos} fotos en la galería, {PLANS.premium.guestPhotos} fotos de invitados y{" "}
+                  {PLANS.premium.months} meses publicada. Se activa al momento.
+                </p>
+                <button onClick={() => pay("premium")} disabled={paying} className="btn px-4 py-2 text-sm">
+                  {paying ? "Un momento…" : `Mejorar · ${UPGRADE_LABEL}`}
+                </button>
+              </div>
+            )}
           </div>
         ) : guest ? (
           <div className="mb-6 rounded-2xl border border-brand bg-card p-5 text-sm">
@@ -249,9 +312,30 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
           <div className="mb-6 rounded-2xl border border-rule bg-card p-5 text-sm">
             <div className="font-semibold">Borrador: podéis editarlo gratis todo el tiempo que queráis.</div>
             <p className="mt-1 text-soft">
-              Al publicar se paga una sola vez ({PRICE_LABEL}) con tarjeta en una página segura de Stripe, y la
-              invitación queda activa al momento con su enlace para compartir.
+              Al publicar se paga una sola vez con tarjeta en una página segura de Stripe, y la invitación queda
+              activa al momento con su enlace con vuestros nombres.
             </p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {(Object.keys(PLANS) as PlanId[]).map((id) => (
+                <label
+                  key={id}
+                  className={`cursor-pointer rounded-xl border p-4 ${plan === id ? "border-brand ring-1 ring-brand" : "border-rule"}`}
+                >
+                  <span className="flex items-center justify-between gap-2">
+                    <span className="flex items-center gap-2 font-semibold">
+                      <input type="radio" name="plan" checked={plan === id} onChange={() => setPlan(id)} className="h-4 w-4 accent-[var(--brand)]" />
+                      {PLANS[id].name}
+                    </span>
+                    <span className="font-serif text-2xl">{PLANS[id].label}</span>
+                  </span>
+                  <span className="mt-2 block text-soft">
+                    {id === "basico"
+                      ? `Todo lo que veis en el editor, dirección con vuestros nombres, ${PLANS[id].months} meses publicada.`
+                      : `Además: elegís la dirección, sin «Hecha con ${BRAND}», ${PLANS[id].photos} fotos en la galería, ${PLANS[id].guestPhotos} fotos de invitados y ${PLANS[id].months} meses publicada.`}
+                  </span>
+                </label>
+              ))}
+            </div>
             <label className="mt-3 flex items-start gap-2">
               <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[var(--brand)]" />
               <span>
@@ -273,7 +357,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
             <h2 className="font-serif text-3xl">Fotos de vuestros invitados</h2>
             <p className="mt-1 max-w-2xl text-sm text-soft">
               Imprimid el cartel con el código QR y ponedlo en las mesas: los invitados lo escanean y suben sus
-              fotos. Solo las veis vosotros, aquí. Límite: {GUEST_PHOTO_LIMIT} fotos.
+              fotos. Solo las veis vosotros, aquí. Límite: {limits.guestPhotos} fotos.
             </p>
             {!initial.paid ? (
               <p className="mt-5 text-sm">Disponible cuando publiquéis la invitación.</p>
@@ -523,10 +607,10 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
                     </div>
                   ))}
                 </div>
-                {data.photos.length < MAX_PHOTOS ? (
+                {data.photos.length < limits.photos ? (
                   <input type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(e) => { upload(e.target.files, "gallery"); e.target.value = ""; }} className="max-w-full min-w-0 text-sm" />
                 ) : (
-                  <p className="text-sm text-soft">Máximo {MAX_PHOTOS} fotos.</p>
+                  <p className="text-sm text-soft">Máximo {limits.photos} fotos{initial.plan === "basico" ? ` (${PLANS.premium.photos} con Premium)` : ""}.</p>
                 )}
                 {uploading && <p className="text-sm text-soft">Subiendo…</p>}
               </Group>

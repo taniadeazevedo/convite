@@ -1,6 +1,6 @@
 import LegalPage, { H } from "@/components/LegalPage";
 import { LEGAL } from "@/lib/legal";
-import { BRAND, GUEST_PHOTO_LIMIT, PRICE_LABEL } from "@/lib/templates";
+import { BRAND, PLANS, UPGRADE_LABEL } from "@/lib/templates";
 
 export const metadata = { title: `Términos y condiciones · ${BRAND}` };
 
@@ -13,8 +13,9 @@ export default function Page() {
       <H>1. El servicio</H>
       <p>
         {BRAND} permite crear una invitación de boda digital a partir de una plantilla, compartirla mediante un
-        enlace, recibir confirmaciones de asistencia y recoger fotos de los invitados (hasta {GUEST_PHOTO_LIMIT}{" "}
-        por invitación).
+        enlace, recibir confirmaciones de asistencia y recoger fotos de los invitados (hasta{" "}
+        {PLANS.basico.guestPhotos} por invitación en el plan {PLANS.basico.name} y {PLANS.premium.guestPhotos} en el
+        plan {PLANS.premium.name}).
       </p>
       <H>2. Cuenta</H>
       <p>
@@ -24,8 +25,10 @@ export default function Page() {
       </p>
       <H>3. Precio y pago</H>
       <p>
-        Crear y editar un borrador es gratuito. Publicar una invitación cuesta {PRICE_LABEL} (impuestos incluidos),
-        en un pago único por invitación, sin suscripción. El pago se realiza con tarjeta a través de Stripe;{" "}
+        Crear y editar un borrador es gratuito. Publicar una invitación cuesta {PLANS.basico.label} en el plan{" "}
+        {PLANS.basico.name} o {PLANS.premium.label} en el plan {PLANS.premium.name} (impuestos incluidos), en un pago
+        único por invitación, sin suscripción. Una invitación publicada en el plan {PLANS.basico.name} puede pasar
+        al {PLANS.premium.name} pagando la diferencia ({UPGRADE_LABEL}). El pago se realiza con tarjeta a través de Stripe;{" "}
         {BRAND} no almacena los datos de la tarjeta.
       </p>
       <H>4. Derecho de desistimiento</H>
@@ -37,7 +40,8 @@ export default function Page() {
       </p>
       <H>5. Duración</H>
       <p>
-        La invitación publicada permanece accesible durante 12 meses desde la fecha de publicación. Pasado ese
+        La invitación publicada permanece accesible durante {PLANS.basico.months} meses desde la fecha de
+        publicación ({PLANS.premium.months} meses en el plan {PLANS.premium.name}). Pasado ese
         plazo puede retirarse y sus datos eliminarse, previo aviso por correo.
       </p>
       <H>6. Contenido del usuario</H>

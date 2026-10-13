@@ -12,7 +12,8 @@ export const FUNNEL = [
   ["venta", "Pagan"],
 ] as const;
 
-export type StatEvent = (typeof FUNNEL)[number][0];
+// "premium": ventas hechas directamente en Premium · "mejora": Esencial que pasa después a Premium
+export type StatEvent = (typeof FUNNEL)[number][0] | "premium" | "mejora";
 
 const BOT = /bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegram|monitor|curl|wget|headless/i;
 

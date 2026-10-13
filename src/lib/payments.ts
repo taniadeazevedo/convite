@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { BRAND, PRICE_CENTS } from "./templates";
+import { BRAND, PLANS, UPGRADE_CENTS, isPlanId, type PlanId } from "./templates";
 
 export const stripeEnabled = Boolean(process.env.STRIPE_SECRET_KEY);
 // Sin clave de Stripe, en desarrollo se puede simular el pago para probar el flujo completo
@@ -9,12 +9,15 @@ function stripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!);
 }
 
-export async function createCheckout(token: string, origin: string): Promise<string> {
+// upgrade: la invitación ya está publicada en Esencial y solo se cobra la diferencia hasta Premium
+export async function createCheckout(token: string, origin: string, plan: PlanId, upgrade = false): Promise<string> {
   const session = await stripe().checkout.sessions.create({
     mode: "payment",
     // Solo tarjeta: Apple Pay y Google Pay van incluidos en "card"
     allowed_payment_method_types: ["card"],
     client_reference_id: token,
+    // El plan viaja con el pago para saber qué activar cuando Stripe confirma el cobro
+    metadata: { plan },
     // Casilla «Añadir código promocional»: los códigos se crean en Stripe (Productos → Cupones)
     allow_promotion_codes: true,
     line_items: [
@@ -22,8 +25,10 @@ export async function createCheckout(token: string, origin: string): Promise<str
         quantity: 1,
         price_data: {
           currency: "eur",
-          unit_amount: PRICE_CENTS,
-          product_data: { name: `Invitación de boda digital · ${BRAND}` },
+          unit_amount: upgrade ? UPGRADE_CENTS : PLANS[plan].cents,
+          product_data: {
+            name: upgrade ? `Mejora a ${PLANS.premium.name} · ${BRAND}` : `Invitación de boda digital ${PLANS[plan].name} · ${BRAND}`,
+          },
         },
       },
     ],
@@ -33,18 +38,23 @@ export async function createCheckout(token: string, origin: string): Promise<str
   return session.url!;
 }
 
-export async function isSessionPaid(sessionId: string, token: string): Promise<boolean> {
+const planOf = (metadata: Record<string, string> | null | undefined): PlanId => (isPlanId(metadata?.plan) ? metadata.plan : "basico");
+
+// Devuelve el plan pagado, o null si esa sesión no es un pago completado de esta invitación
+export async function paidPlanOfSession(sessionId: string, token: string): Promise<PlanId | null> {
   const session = await stripe().checkout.sessions.retrieve(sessionId);
-  return session.client_reference_id === token && session.payment_status === "paid";
+  if (session.client_reference_id !== token || session.payment_status !== "paid") return null;
+  return planOf(session.metadata);
 }
 
 // Aviso que Stripe envía a /api/stripe/webhook cuando un pago se completa.
-// Devuelve el identificador de la invitación pagada, o null si el aviso no es válido o no es un pago.
-export function paidTokenFromWebhook(body: string, signature: string): string | null {
+// Devuelve la invitación pagada y su plan, o null si el aviso no es válido o no es un pago.
+export function paidFromWebhook(body: string, signature: string): { token: string; plan: PlanId } | null {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!stripeEnabled || !secret) return null;
   const event = stripe().webhooks.constructEvent(body, signature, secret);
   if (event.type !== "checkout.session.completed") return null;
   const session = event.data.object;
-  return session.payment_status === "paid" ? session.client_reference_id : null;
+  if (session.payment_status !== "paid" || !session.client_reference_id) return null;
+  return { token: session.client_reference_id, plan: planOf(session.metadata) };
 }

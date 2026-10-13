@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { saveInvitation } from "@/lib/db";
 import { removeUpload, writeUpload } from "@/lib/storage";
 import { IMAGE_NAME, MAX_IMAGE_BYTES, processImage } from "@/lib/images";
-import { MAX_PHOTOS } from "@/lib/templates";
+import { PLANS } from "@/lib/templates";
 import { ownedInvitation } from "@/lib/auth";
 
 function fileFromUrl(slug: string, url: unknown): string | null {
@@ -22,8 +22,9 @@ export async function POST(req: Request, ctx: { params: Promise<{ token: string 
   const kind = form?.get("kind") === "cover" ? "cover" : "gallery";
   if (!(file instanceof File)) return Response.json({ error: "Falta la foto" }, { status: 400 });
   if (file.size > MAX_IMAGE_BYTES) return Response.json({ error: "La foto pesa más de 12 MB" }, { status: 400 });
-  if (kind === "gallery" && inv.data.photos.length >= MAX_PHOTOS) {
-    return Response.json({ error: `Máximo ${MAX_PHOTOS} fotos en la galería` }, { status: 400 });
+  const maxPhotos = PLANS[inv.plan].photos;
+  if (kind === "gallery" && inv.data.photos.length >= maxPhotos) {
+    return Response.json({ error: `Máximo ${maxPhotos} fotos en la galería` }, { status: 400 });
   }
 
   const buf = await processImage(Buffer.from(await file.arrayBuffer()));
