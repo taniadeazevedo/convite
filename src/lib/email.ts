@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { DATA_DIR } from "./db";
+import { LEGAL } from "./legal";
 import { BRAND } from "./templates";
 
 type Mail = { to: string; subject: string; text: string };
@@ -17,7 +18,8 @@ export async function sendEmail({ to, subject, text }: Mail): Promise<void> {
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ from, to, subject, text: body }),
+        // El remitente no necesita buzón propio: las respuestas llegan al correo de contacto (o a EMAIL_REPLY_TO)
+        body: JSON.stringify({ from, to, subject, text: body, reply_to: process.env.EMAIL_REPLY_TO || LEGAL.email }),
       });
       if (!res.ok) console.error("No se pudo enviar el correo:", res.status, await res.text());
       return;
