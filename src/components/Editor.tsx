@@ -721,7 +721,8 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
               <div className="sticky top-24">
                 <div className="mb-2 text-center text-xs uppercase tracking-wider text-soft">Así la verán en el móvil</div>
                 <div className="mx-auto h-[calc(100svh-11rem)] max-w-[400px] overflow-y-auto rounded-[2rem] border-8 border-ink bg-white lg:h-[calc(100svh-9rem)]">
-                  <Invitation template={template} data={data} mode="preview" embedded />
+                  {/* En Premium (contratado, o elegido para publicar) la vista previa tampoco lleva «Hecha con Invitalia» */}
+                  <Invitation template={template} data={data} mode="preview" embedded branding={plan !== "premium"} />
                 </div>
               </div>
             </aside>
