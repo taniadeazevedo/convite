@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Invitation from "@/components/Invitation";
+import TrackSource from "@/components/TrackSource";
 import { trackVisit } from "@/lib/stats";
-import { isTemplateId, sampleData } from "@/lib/templates";
+import { BRAND, TEMPLATES, isTemplateId, sampleData } from "@/lib/templates";
 
 // La fecha de ejemplo se calcula respecto a hoy, así que no se genera de antemano
 export const dynamic = "force-dynamic";
@@ -11,6 +12,17 @@ type Props = {
   params: Promise<{ template: string }>;
   searchParams: Promise<{ n1?: string; n2?: string }>;
 };
+
+export async function generateMetadata({ params }: Props) {
+  const { template } = await params;
+  const t = TEMPLATES.find((x) => x.id === template);
+  if (!t) return {};
+  return {
+    title: `Invitación de boda digital «${t.name}» · ${BRAND}`,
+    description: `Diseño ${t.name}: ${t.tagline.toLowerCase()}. Vedla completa, como la recibiría un invitado.`,
+    alternates: { canonical: `/demo/${t.id}` },
+  };
+}
 
 export default async function Demo({ params, searchParams }: Props) {
   const { template } = await params;
@@ -23,12 +35,16 @@ export default async function Demo({ params, searchParams }: Props) {
   await trackVisit("demo");
   return (
     <>
+      <TrackSource />
       <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-rule bg-paper/95 px-4 py-3 text-sm backdrop-blur">
         <Link href="/#disenos" className="text-soft">
           ← Diseños
         </Link>
         <span className="hidden text-soft sm:inline">Invitación de ejemplo</span>
-        <Link href={`/crear?plantilla=${template}`} className="btn px-4 py-2 text-sm">
+        <Link
+          href={`/crear?${new URLSearchParams({ plantilla: template, ...(n1 && { n1: n1.slice(0, 40) }), ...(n2 && { n2: n2.slice(0, 40) }) })}`}
+          className="btn px-4 py-2 text-sm"
+        >
           Usar este diseño
         </Link>
       </div>

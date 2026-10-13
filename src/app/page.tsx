@@ -1,12 +1,14 @@
 import Link from "next/link";
-import TemplateCard from "@/components/TemplateCard";
+import DesignsGrid from "@/components/DesignsGrid";
+import TrackSource from "@/components/TrackSource";
 import TemplatePhone from "@/components/TemplatePhone";
 import { LEGAL_LINKS } from "@/components/LegalPage";
 import { LEGAL } from "@/lib/legal";
+import { dailyCleanup } from "@/lib/cleanup";
 import { trackVisit } from "@/lib/stats";
 import { countInvitations } from "@/lib/db";
 import { REVIEWS } from "@/lib/reviews";
-import { BRAND, PLANS, PRICE_LABEL, SAMPLE_PHOTOS, TEMPLATES } from "@/lib/templates";
+import { BRAND, PLANS, PRICE_LABEL, SAMPLE_PHOTOS } from "@/lib/templates";
 
 const photo = (i: number) => SAMPLE_PHOTOS[i % SAMPLE_PHOTOS.length];
 
@@ -74,11 +76,44 @@ export const dynamic = "force-dynamic";
 // A partir de cuántas invitaciones creadas se enseña la cifra
 const MIN_TO_SHOW = 25;
 
+// La portada es la dirección «oficial» aunque llegue con ?ref=… o ?utm_source=…
+export const metadata = { alternates: { canonical: "/" } };
+
 export default async function Home() {
   await trackVisit("portada");
+  dailyCleanup(); // tareas de una vez al día (copia de seguridad, avisos): se aprovecha cualquier visita
   const couples = countInvitations();
   return (
     <main className="overflow-x-clip">
+      <TrackSource />
+      {/* Datos para Google: qué se vende, a qué precio, y las preguntas frecuentes */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            {
+              "@context": "https://schema.org",
+              "@type": "Product",
+              name: `Invitación de boda digital ${BRAND}`,
+              description: "Invitación de boda web con confirmación de asistencia, mapa, cuenta atrás y álbum de fotos de invitados.",
+              brand: { "@type": "Brand", name: BRAND },
+              offers: {
+                "@type": "AggregateOffer",
+                priceCurrency: "EUR",
+                lowPrice: PLANS.basico.cents / 100,
+                highPrice: PLANS.premium.cents / 100,
+                offerCount: 2,
+                availability: "https://schema.org/InStock",
+              },
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+            },
+          ]).replace(/</g, "\\u003c"),
+        }}
+      />
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
         <span className="font-serif text-3xl italic">{BRAND}</span>
         <nav className="hidden gap-7 text-sm text-soft sm:flex">
@@ -160,12 +195,7 @@ export default async function Home() {
         <h2 className="mt-3 text-center font-serif text-5xl sm:text-6xl">
           Diez estilos, <em>diez bodas distintas</em>
         </h2>
-        <p className="mt-3 text-center text-soft">Toca cualquiera para verla completa, como la vería un invitado.</p>
-        <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
-          {TEMPLATES.map((t) => (
-            <TemplateCard key={t.id} t={t} href={`/demo/${t.id}`} />
-          ))}
-        </div>
+        <DesignsGrid />
       </section>
 
       {/* Ventajas con foto */}

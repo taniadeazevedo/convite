@@ -3,6 +3,8 @@ import {
   deleteUserRows,
   getUserById,
   listAnonymousDraftsBefore,
+  listPaidNotAskedForReview,
+  markReviewAsked,
   listByUser,
   listDraftsToRemind,
   listPaidBefore,
@@ -10,6 +12,7 @@ import {
   markReminded,
   type Invitation,
 } from "./db";
+import { dailyBackup } from "./backup";
 import { removeUpload } from "./storage";
 import { sendEmail } from "./email";
 import { BRAND, PLANS, PRICE_LABEL, type PlanId } from "./templates";
@@ -48,6 +51,12 @@ export function dailyCleanup() {
   if (now - lastRun < 86400_000) return;
   lastRun = now;
   try {
+    // Lo primero, la copia de seguridad: si algo de lo siguiente fallara, los datos de ayer están a salvo
+    dailyBackup();
+  } catch (e) {
+    console.error("Copia de seguridad:", e);
+  }
+  try {
     for (const plan of Object.keys(PLANS) as PlanId[]) {
       const months = PLANS[plan].months;
       for (const inv of listPaidBefore(new Date(now - months * MONTH).toISOString(), false, plan)) removeInvitation(inv.slug);
@@ -73,6 +82,22 @@ export function dailyCleanup() {
           text: `Empezasteis la invitación${names} en ${BRAND} y se quedó en borrador. Sigue guardada tal como la dejasteis:\n\n${origin}/panel/${inv.token}\n\nPodéis seguir editándola gratis; solo se paga al publicarla (${PRICE_LABEL}, una vez). Si tenéis alguna duda, responded a este correo.\n\nEs el único recordatorio que os enviaremos.`,
         });
       }
+    }
+    // Una semana después de la boda (y hasta dos meses después), se pide la opinión una sola vez
+    const from = new Date(now - 60 * DAY).toISOString().slice(0, 10);
+    const to = new Date(now - 7 * DAY).toISOString().slice(0, 10);
+    for (const inv of listPaidNotAskedForReview()) {
+      const date = inv.data.date;
+      if (!date || date < from || date > to) continue;
+      markReviewAsked(inv.slug);
+      const owner = inv.userId ? getUserById(inv.userId) : null;
+      if (!owner) continue;
+      void sendEmail({
+        to: owner.email,
+        subject: "¿Qué tal fue la boda? 🤍",
+        title: `¡Enhorabuena, ${inv.data.name1} y ${inv.data.name2}!`,
+        text: `Esperamos que fuera un día redondo.\n\n¿Nos contáis en dos líneas qué tal os fue con la invitación de ${BRAND}? Basta con responder a este correo. Nos ayuda muchísimo, y a otras parejas a decidirse.\n\nSi os parece bien que publiquemos vuestra opinión en la web con vuestros nombres, decidnoslo en la respuesta; si no lo decís, no la publicamos.\n\nRecordad que desde vuestro panel podéis descargar las fotos que subieron los invitados y la lista de confirmados.`,
+      });
     }
   } catch (e) {
     console.error("Limpieza diaria:", e);

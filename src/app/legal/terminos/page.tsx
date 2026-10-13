@@ -20,7 +20,8 @@ export default function Page() {
       <H>2. Cuenta</H>
       <p>
         Se puede probar el editor sin registrarse; para guardar y publicar una invitación hace falta una cuenta
-        con correo y contraseña. Los borradores creados sin cuenta se eliminan a los 7 días. Cada usuario es responsable de
+        con correo y contraseña, y confirmar ese correo mediante el enlace que se envía al registrarse. Los
+        borradores creados sin cuenta se eliminan a los 7 días. Cada usuario es responsable de
         custodiar su contraseña y de la veracidad de sus datos.
       </p>
       <H>3. Precio y pago</H>

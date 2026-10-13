@@ -1,8 +1,8 @@
 import { hashPassword, startSession, tooManyAttempts } from "@/lib/auth";
 import { createUser } from "@/lib/db";
-import { sendEmail, siteOrigin } from "@/lib/email";
+import { siteOrigin } from "@/lib/email";
+import { sendVerification } from "@/lib/verify";
 import { track } from "@/lib/stats";
-import { BRAND } from "@/lib/templates";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
@@ -24,12 +24,7 @@ export async function POST(req: Request) {
   if (!user) return Response.json({ error: "Ya existe una cuenta con ese correo. Entra con ella." }, { status: 409 });
   await startSession(user.id);
   track("cuenta");
-  void sendEmail({
-    to: user.email,
-    subject: `Bienvenidos a ${BRAND} 🤍`,
-    title: "¡Enhorabuena por la boda!",
-    button: "Ir a nuestra invitación",
-    text: `Vuestra cuenta de ${BRAND} ya está lista. A partir de aquí todo es sencillo: elegís un diseño, ponéis vuestros nombres, la fecha y las fotos, y veis la invitación tal cual la recibirán vuestros invitados.\n\n${siteOrigin(req)}/cuenta\n\nTres cosas que conviene saber:\n· Crear y editar es gratis, todo el tiempo que necesitéis.\n· Solo se paga al publicarla, una única vez.\n· Después podéis cambiar lo que queráis; los invitados siempre ven la última versión.`,
-  });
+  // Correo de bienvenida con el enlace para confirmar la dirección
+  void sendVerification(user, siteOrigin(req));
   return Response.json({ ok: true });
 }

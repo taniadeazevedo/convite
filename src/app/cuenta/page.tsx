@@ -5,6 +5,7 @@ import LogoutButton from "@/components/LogoutButton";
 import { currentUser } from "@/lib/auth";
 import { dailyCleanup } from "@/lib/cleanup";
 import { countRsvps, listByUser } from "@/lib/db";
+import VerifyNotice from "@/components/VerifyNotice";
 import { isAdmin } from "@/lib/stats";
 import { BRAND, formatDate, getTemplate } from "@/lib/templates";
 
@@ -14,7 +15,7 @@ export default async function Cuenta({ searchParams }: { searchParams: Promise<{
   const user = await currentUser();
   if (!user) redirect("/entrar?next=/cuenta");
   // La administradora entra directamente a las estadísticas; sus invitaciones siguen en /cuenta?ver=invitaciones
-  if (isAdmin(user.email) && (await searchParams).ver !== "invitaciones") redirect("/cuenta/estadisticas");
+  if (isAdmin(user) && (await searchParams).ver !== "invitaciones") redirect("/cuenta/estadisticas");
   dailyCleanup();
   const invitations = listByUser(user.id);
   return (
@@ -22,7 +23,7 @@ export default async function Cuenta({ searchParams }: { searchParams: Promise<{
       <header className="flex items-center justify-between">
         <Link href="/" className="font-serif text-3xl italic">{BRAND}</Link>
         <div className="flex items-center gap-4">
-          {isAdmin(user.email) && (
+          {isAdmin(user) && (
             <Link href="/cuenta/estadisticas" className="text-sm underline">
               Estadísticas
             </Link>
@@ -31,6 +32,11 @@ export default async function Cuenta({ searchParams }: { searchParams: Promise<{
           <LogoutButton />
         </div>
       </header>
+      {!user.verified && (
+        <div className="mt-8">
+          <VerifyNotice email={user.email} />
+        </div>
+      )}
       <div className="mt-10 flex flex-wrap items-end justify-between gap-4">
         <h1 className="font-serif text-5xl">Mis invitaciones</h1>
         <Link href="/crear" className="btn text-sm">+ Nueva invitación</Link>

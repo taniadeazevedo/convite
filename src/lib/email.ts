@@ -6,7 +6,15 @@ import { BRAND } from "./templates";
 
 // title: titular grande del correo. button: texto del botón; el enlace es la primera línea del texto
 // que sea una dirección web (esa línea se sustituye por el botón en la versión con diseño).
-type Mail = { to: string; subject: string; text: string; title?: string; button?: string };
+// attachments: archivos adjuntos, con el contenido en base64 (lo usa la copia de seguridad)
+type Mail = {
+  to: string;
+  subject: string;
+  text: string;
+  title?: string;
+  button?: string;
+  attachments?: { filename: string; content: string }[];
+};
 
 const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -62,7 +70,7 @@ export async function sendEmail(mail: Mail): Promise<void> {
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
         // Se envían las dos versiones: con diseño (html) y solo texto, para los programas que no muestran html.
         // El remitente no necesita buzón propio: las respuestas llegan al correo de contacto (o a EMAIL_REPLY_TO).
-        body: JSON.stringify({ from, to, subject, text: body, html: renderHtml(mail), reply_to: process.env.EMAIL_REPLY_TO || LEGAL.email }),
+        body: JSON.stringify({ from, to, subject, text: body, html: renderHtml(mail), reply_to: process.env.EMAIL_REPLY_TO || LEGAL.email, attachments: mail.attachments }),
       });
       if (!res.ok) console.error("No se pudo enviar el correo:", res.status, await res.text());
       return;

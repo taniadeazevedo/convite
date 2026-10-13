@@ -15,8 +15,8 @@ export default function Page() {
       <ul>
         <li>
           <strong>Usuarios (parejas):</strong> correo y contraseña cifrada, para gestionar la cuenta y enviar los
-          avisos del servicio (bienvenida, un único recordatorio si la invitación se queda sin publicar y el aviso
-          previo a su retirada); contenido de la invitación (nombres, fecha, lugares, textos, fotos); y datos del
+          avisos del servicio (confirmación del correo, aviso de publicación, un único recordatorio si la invitación
+          se queda sin publicar, una petición de opinión tras la boda y el aviso previo a su retirada); contenido de la invitación (nombres, fecha, lugares, textos, fotos); y datos del
           pago, que gestiona Stripe. Lo que se escribe al probar el editor sin cuenta se borra a los 7 días.
         </li>
         <li>

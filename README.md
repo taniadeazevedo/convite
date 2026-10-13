@@ -55,8 +55,16 @@ Sin dominio propio verificado, Resend solo deja enviar a tu propio correo.
 
 - **Estadísticas**: regístrate en la web con el correo de `ADMIN_EMAIL` y abre `/cuenta/estadisticas`. Muestra cuánta gente pasa por cada paso hasta pagar.
 - **Códigos de descuento**: se crean en Stripe (Productos → Cupones → código promocional). En la página de pago aparece la casilla para escribirlo, y Stripe indica cuántas ventas trae cada código.
+- **De dónde vienen**: las estadísticas separan visitas, borradores y ventas por origen. Para medir un anuncio o a un colaborador, usa enlaces como `https://www.invitalia.es/?ref=fotografo-ana` o `?utm_source=instagram`.
+- **Opiniones**: una semana después de la fecha de la boda, la pareja recibe un correo pidiendo su opinión; la respuesta llega a tu correo.
 - **Recordatorio**: quien deja una invitación en borrador recibe un único correo a los 2 días (necesita Resend y `SITE_URL`).
 - Se puede probar el editor sin cuenta; esos borradores se borran a los 7 días si nadie los guarda.
+
+## Copias de seguridad
+
+- Cada día se guarda una copia de la base de datos en `copias/` dentro del disco (se conservan 7).
+- Con la variable `BACKUP_EMAIL=tu-correo`, esa copia se envía además por correo cada día. Es la única copia automática que queda **fuera** del disco de Railway.
+- En las estadísticas, «Descargar copia completa» baja un `.tar.gz` con la base de datos y todas las fotos. Para restaurar: descomprimirlo en la carpeta de datos y renombrar la copia más reciente a `app.db`.
 
 ## Dónde tocar
 

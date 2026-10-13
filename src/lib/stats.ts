@@ -33,13 +33,35 @@ export async function trackVisit(event: StatEvent) {
   track(event);
 }
 
+// --- Origen de las visitas (instagram, google, un colaborador…)
+
+// Solo letras, números y guiones, para poder usarlo como nombre de contador
+export function cleanSource(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const s = value.toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 30);
+  return s || null;
+}
+
+// Contadores por origen: visita@instagram, borrador@instagram, venta@instagram
+export function trackSource(step: "visita" | "borrador", source: string) {
+  try {
+    addStat(`${step}@${source}`);
+  } catch (e) {
+    console.error("Estadísticas:", e);
+  }
+}
+
 // Día (AAAA-MM-DD) de hace `days - 1` días: el primer día de un periodo de `days` días que acaba hoy
 export function firstDayOf(days: number): string {
   return new Date(Date.now() - (days - 1) * 86400_000).toISOString().slice(0, 10);
 }
 
-// Quién puede ver /cuenta/estadisticas: el correo de la variable ADMIN_EMAIL
-export function isAdmin(email: string): boolean {
+// Quién puede ver /cuenta/estadisticas: el correo de la variable ADMIN_EMAIL, y solo si lo ha confirmado
+// (así nadie puede registrarse con esa dirección sin tener acceso a su buzón y ver las cifras)
+export function isAdminEmail(email: string): boolean {
   const admin = process.env.ADMIN_EMAIL?.trim().toLowerCase();
   return Boolean(admin) && email.toLowerCase() === admin;
+}
+export function isAdmin(user: { email: string; verified: boolean }): boolean {
+  return user.verified && isAdminEmail(user.email);
 }

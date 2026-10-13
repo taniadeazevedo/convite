@@ -12,6 +12,12 @@ export default function Page() {
         «borrador», que durante 7 días recuerda en tu navegador la invitación que empezaste sin registrarte. Son
         imprescindibles para que el servicio funcione y por eso no requieren consentimiento.
       </p>
+      <H>Medición propia</H>
+      <p>
+        Además, una cookie propia llamada «origen» recuerda durante 30 días únicamente por dónde llegaste a la web
+        (por ejemplo, «instagram» o «google»), para saber qué canales funcionan. No contiene ningún identificador
+        tuyo, no se comparte con nadie y no sirve para seguirte por otras webs.
+      </p>
       <H>Cookies de terceros</H>
       <p>
         {BRAND} no usa cookies de analítica ni de publicidad: las visitas se cuentan en el servidor, de forma

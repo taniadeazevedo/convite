@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { hashPassword, startSession } from "@/lib/auth";
-import { getResetUser, setPassword } from "@/lib/db";
+import { getResetUser, markVerified, setPassword } from "@/lib/db";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
@@ -12,6 +12,7 @@ export async function POST(req: Request) {
   const userId = getResetUser(createHash("sha256").update(token).digest("hex"));
   if (!userId) return Response.json({ error: "El enlace ha caducado o ya se ha usado. Pide uno nuevo." }, { status: 400 });
   setPassword(userId, hashPassword(password));
+  markVerified(userId); // ha abierto un enlace enviado a ese correo: queda confirmado
   await startSession(userId);
   return Response.json({ ok: true });
 }

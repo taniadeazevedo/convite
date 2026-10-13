@@ -9,7 +9,12 @@ export async function POST(req: Request, ctx: { params: Promise<{ token: string 
   const inv = await ownedInvitation(token);
   if (!inv) return Response.json({ error: "No encontrada" }, { status: 404 });
   // Para publicar hace falta cuenta: es donde queda guardada la invitación y a donde llegan los avisos
-  if (!(await currentUser())) return Response.json({ error: "Crea una cuenta para publicar" }, { status: 401 });
+  const user = await currentUser();
+  if (!user) return Response.json({ error: "Crea una cuenta para publicar" }, { status: 401 });
+  // Con el correo confirmado nos aseguramos de que el enlace y los avisos llegan a la pareja
+  if (!user.verified) {
+    return Response.json({ error: "Antes de publicar, confirmad vuestro correo con el enlace que os hemos enviado." }, { status: 403 });
+  }
   const body = await req.json().catch(() => null);
   const plan = isPlanId(body?.plan) ? body.plan : "basico";
   // Ya publicada: lo único que se puede comprar es la mejora de Esencial a Premium

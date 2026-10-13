@@ -36,5 +36,5 @@ export default async function Panel({ params, searchParams }: Props) {
     }
   }
 
-  return <Editor initial={inv} rsvps={listRsvps(inv.slug)} guestPhotos={listGuestPhotos(inv.slug)} demoPayments={demoPayments} origin={origin} guest={!user} />;
+  return <Editor initial={inv} rsvps={listRsvps(inv.slug)} guestPhotos={listGuestPhotos(inv.slug)} demoPayments={demoPayments} origin={origin} guest={!user} unverifiedEmail={user && !user.verified ? user.email : null} />;
 }

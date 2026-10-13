@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { currentUser, tooManyAttempts } from "@/lib/auth";
 import { createInvitation } from "@/lib/db";
-import { track } from "@/lib/stats";
+import { cleanSource, track, trackSource } from "@/lib/stats";
 import { isTemplateId } from "@/lib/templates";
 
 export async function POST(req: Request) {
@@ -17,8 +17,12 @@ export async function POST(req: Request) {
       return Response.json({ error: "Demasiados borradores seguidos. Crea una cuenta para continuar." }, { status: 429 });
     }
   }
-  const inv = createInvitation(body.template, user?.id ?? null);
+  const str = (v: unknown) => (typeof v === "string" ? v.trim().slice(0, 40) : undefined);
+  // De dónde llegó esta visita (lo anotó la portada en la cookie «origen»)
+  const source = cleanSource((await cookies()).get("origen")?.value);
+  const inv = createInvitation(body.template, user?.id ?? null, { name1: str(body.name1), name2: str(body.name2) }, source);
   track("borrador");
+  if (source) trackSource("borrador", source);
   // Sin cuenta, el navegador recuerda el borrador 7 días para poder volver a él
   if (!user) {
     (await cookies()).set("borrador", inv.token, {

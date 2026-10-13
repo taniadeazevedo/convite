@@ -71,6 +71,16 @@ function getDb(): DatabaseSync {
   addColumn("invitations", "expiry_notified", "INTEGER NOT NULL DEFAULT 0");
   addColumn("rsvps", "reply_key", "TEXT");
   addColumn("invitations", "reminded", "INTEGER NOT NULL DEFAULT 0");
+  addColumn("invitations", "review_asked", "INTEGER NOT NULL DEFAULT 0"); // ya se le pidió la opinión tras la boda
+  addColumn("invitations", "source", "TEXT"); // de dónde llegó quien la creó (instagram, google…)
+  addColumn("users", "verified_at", "TEXT"); // cuándo confirmó que el correo es suyo
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS email_verifications (
+      token_hash TEXT PRIMARY KEY,
+      user_id INTEGER NOT NULL,
+      expires_at TEXT NOT NULL
+    );
+  `);
   addColumn("invitations", "alias", "TEXT"); // dirección con los nombres: /lucia-y-marcos
   addColumn("invitations", "plan", "TEXT"); // "basico" o "premium"; vacío hasta que se publica
   db.exec("CREATE UNIQUE INDEX IF NOT EXISTS invitations_alias ON invitations(alias)");
@@ -98,6 +108,7 @@ export type Invitation = {
   // Dirección pública con los nombres (se asigna al publicar) y plan contratado
   alias: string | null;
   plan: PlanId;
+  source: string | null;
 };
 
 export type Rsvp = {
@@ -124,18 +135,27 @@ function toInvitation(r: Row): Invitation {
     createdAt: r.created_at as string,
     alias: (r.alias as string | null) ?? null,
     plan: isPlanId(r.plan) ? r.plan : "basico",
+    source: (r.source as string | null) ?? null,
   };
 }
 
 // userId es null cuando alguien empieza a probar sin cuenta: el borrador se le asigna al registrarse
-export function createInvitation(template: TemplateId, userId: number | null): Invitation {
+// names: los nombres que la pareja escribió en la portada para probar los diseños
+// source: de dónde llegó (instagram, google…), para saber qué canal trae ventas
+export function createInvitation(
+  template: TemplateId,
+  userId: number | null,
+  names: { name1?: string; name2?: string } = {},
+  source: string | null = null,
+): Invitation {
   const slug = randomBytes(5).toString("hex");
   const token = randomBytes(24).toString("hex");
   const now = new Date().toISOString();
+  const data = { ...emptyData(), name1: (names.name1 ?? "").slice(0, 40), name2: (names.name2 ?? "").slice(0, 40) };
   getDb()
-    .prepare("INSERT INTO invitations (slug, token, template, data, created_at, user_id) VALUES (?, ?, ?, ?, ?, ?)")
-    .run(slug, token, template, JSON.stringify(emptyData()), now, userId);
-  return { slug, token, template, data: emptyData(), paid: false, visits: 0, userId, createdAt: now, alias: null, plan: "basico" };
+    .prepare("INSERT INTO invitations (slug, token, template, data, created_at, user_id, source) VALUES (?, ?, ?, ?, ?, ?, ?)")
+    .run(slug, token, template, JSON.stringify(data), now, userId, source);
+  return { slug, token, template, data, paid: false, visits: 0, userId, createdAt: now, alias: null, plan: "basico", source };
 }
 
 export function getByToken(token: string): Invitation | null {
@@ -200,6 +220,7 @@ export function markPaid(token: string, plan: PlanId = "basico"): "published" | 
     }
     addStat("venta");
     if (plan === "premium") addStat("premium");
+    if (inv.source) addStat(`venta@${inv.source}`);
     return "published";
   }
   if (plan === "premium" && inv.plan !== "premium") {
@@ -278,7 +299,9 @@ export function setOwner(token: string, userId: number) {
 
 // --- Cuentas y sesiones
 
-export type User = { id: number; email: string };
+export type User = { id: number; email: string; verified: boolean };
+
+const toUser = (r: Row): User => ({ id: r.id as number, email: r.email as string, verified: Boolean(r.verified_at) });
 
 export function createUser(email: string, passwordHash: string): User | null {
   const now = new Date().toISOString();
@@ -286,15 +309,15 @@ export function createUser(email: string, passwordHash: string): User | null {
     const r = getDb()
       .prepare("INSERT INTO users (email, password, terms_accepted_at, created_at) VALUES (?, ?, ?, ?)")
       .run(email, passwordHash, now, now);
-    return { id: Number(r.lastInsertRowid), email };
+    return { id: Number(r.lastInsertRowid), email, verified: false };
   } catch {
     return null; // el correo ya existe
   }
 }
 
 export function getUserWithPassword(email: string): (User & { password: string }) | null {
-  const r = getDb().prepare("SELECT id, email, password FROM users WHERE email = ?").get(email) as Row | undefined;
-  return r ? { id: r.id as number, email: r.email as string, password: r.password as string } : null;
+  const r = getDb().prepare("SELECT id, email, password, verified_at FROM users WHERE email = ?").get(email) as Row | undefined;
+  return r ? { ...toUser(r), password: r.password as string } : null;
 }
 
 export function createSessionRow(id: string, userId: number, expiresAt: string) {
@@ -304,10 +327,10 @@ export function createSessionRow(id: string, userId: number, expiresAt: string) 
 export function getSessionUser(id: string): User | null {
   const r = getDb()
     .prepare(
-      "SELECT u.id, u.email FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ? AND s.expires_at > ?",
+      "SELECT u.id, u.email, u.verified_at FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ? AND s.expires_at > ?",
     )
     .get(id, new Date().toISOString()) as Row | undefined;
-  return r ? { id: r.id as number, email: r.email as string } : null;
+  return r ? toUser(r) : null;
 }
 
 export function deleteSession(id: string) {
@@ -315,8 +338,32 @@ export function deleteSession(id: string) {
 }
 
 export function getUserById(id: number): User | null {
-  const r = getDb().prepare("SELECT id, email FROM users WHERE id = ?").get(id) as Row | undefined;
-  return r ? { id: r.id as number, email: r.email as string } : null;
+  const r = getDb().prepare("SELECT id, email, verified_at FROM users WHERE id = ?").get(id) as Row | undefined;
+  return r ? toUser(r) : null;
+}
+
+// --- Confirmación del correo
+
+export function createVerification(tokenHash: string, userId: number, expiresAt: string) {
+  const d = getDb();
+  d.prepare("DELETE FROM email_verifications WHERE user_id = ?").run(userId); // solo vale el último enlace
+  d.prepare("INSERT INTO email_verifications (token_hash, user_id, expires_at) VALUES (?, ?, ?)").run(tokenHash, userId, expiresAt);
+}
+
+export function markVerified(userId: number) {
+  const d = getDb();
+  d.prepare("UPDATE users SET verified_at = COALESCE(verified_at, ?) WHERE id = ?").run(new Date().toISOString(), userId);
+  d.prepare("DELETE FROM email_verifications WHERE user_id = ?").run(userId);
+}
+
+// Da por confirmado el correo del enlace. Devuelve false si el enlace no existe o ha caducado.
+export function verifyEmailToken(tokenHash: string): boolean {
+  const r = getDb()
+    .prepare("SELECT user_id FROM email_verifications WHERE token_hash = ? AND expires_at > ?")
+    .get(tokenHash, new Date().toISOString()) as Row | undefined;
+  if (!r) return false;
+  markVerified(r.user_id as number);
+  return true;
 }
 
 export function setPassword(userId: number, passwordHash: string) {
@@ -354,6 +401,7 @@ export function deleteUserRows(userId: number) {
   const d = getDb();
   d.prepare("DELETE FROM sessions WHERE user_id = ?").run(userId);
   d.prepare("DELETE FROM password_resets WHERE user_id = ?").run(userId);
+  d.prepare("DELETE FROM email_verifications WHERE user_id = ?").run(userId);
   d.prepare("DELETE FROM users WHERE id = ?").run(userId);
 }
 
@@ -385,6 +433,21 @@ export function listAnonymousDraftsBefore(iso: string): Invitation[] {
     .prepare("SELECT * FROM invitations WHERE paid = 0 AND user_id IS NULL AND created_at < ?")
     .all(iso) as Row[];
   return rows.map(toInvitation);
+}
+
+// Invitaciones publicadas a las que todavía no se ha pedido opinión (el filtro por fecha de boda se hace fuera)
+export function listPaidNotAskedForReview(): Invitation[] {
+  const rows = getDb().prepare("SELECT * FROM invitations WHERE paid = 1 AND review_asked = 0 AND user_id IS NOT NULL").all() as Row[];
+  return rows.map(toInvitation);
+}
+
+export function markReviewAsked(slug: string) {
+  getDb().prepare("UPDATE invitations SET review_asked = 1 WHERE slug = ?").run(slug);
+}
+
+// Copia completa y coherente de la base de datos en otro archivo (se puede hacer con la web en marcha)
+export function snapshotDatabase(file: string) {
+  getDb().exec(`VACUUM INTO '${file.replace(/'/g, "''")}'`);
 }
 
 // --- Estadísticas del embudo

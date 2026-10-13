@@ -33,9 +33,9 @@ const syne = Syne({ variable: "--font-syne", subsets: ["latin"], weight: ["700",
 export const metadata: Metadata = {
   // Dirección pública de la web: la necesitan las imágenes que se muestran al compartir un enlace
   metadataBase: new URL(process.env.SITE_URL ?? "http://localhost:3000"),
-  title: `${BRAND} · Invitaciones de boda digitales`,
+  title: `${BRAND} · Invitaciones de boda digitales para enviar por WhatsApp`,
   description:
-    "Crea tu invitación de boda web en minutos: elige diseño, rellena vuestros datos y recibe las confirmaciones de asistencia.",
+    "Invitaciones de boda digitales con confirmación de asistencia: elegid diseño, poned vuestros datos y enviadla por WhatsApp. Pago único, sin suscripción.",
   openGraph: { siteName: BRAND, locale: "es_ES", type: "website" },
   twitter: { card: "summary_large_image" },
 };

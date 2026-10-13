@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function CreateButton({ template }: { template: string }) {
+export default function CreateButton({ template, names }: { template: string; names?: { name1?: string; name2?: string } }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
@@ -12,7 +12,7 @@ export default function CreateButton({ template }: { template: string }) {
     const res = await fetch("/api/invitaciones", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ template }),
+      body: JSON.stringify({ template, ...names }),
     }).catch(() => null);
     if (res?.ok) {
       const { token } = await res.json();

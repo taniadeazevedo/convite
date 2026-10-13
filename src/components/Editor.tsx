@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Invitation from "./Invitation";
+import VerifyNotice from "./VerifyNotice";
 import type { Invitation as Inv, Rsvp } from "@/lib/db";
 import {
   BRAND,
@@ -19,7 +20,8 @@ import {
 } from "@/lib/templates";
 
 // guest: está probando sin cuenta; puede editar, pero para publicar tiene que registrarse
-type Props = { initial: Inv; rsvps: Rsvp[]; guestPhotos: string[]; demoPayments: boolean; origin: string; guest: boolean };
+// unverifiedEmail: correo de la cuenta si todavía no lo ha confirmado (no puede publicar hasta hacerlo)
+type Props = { initial: Inv; rsvps: Rsvp[]; guestPhotos: string[]; demoPayments: boolean; origin: string; guest: boolean; unverifiedEmail: string | null };
 
 function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
   return (
@@ -61,7 +63,7 @@ function Group({
   );
 }
 
-export default function Editor({ initial, rsvps, guestPhotos, demoPayments, origin, guest }: Props) {
+export default function Editor({ initial, rsvps, guestPhotos, demoPayments, origin, guest, unverifiedEmail }: Props) {
   // Tras registrarse se vuelve a este mismo panel y el borrador queda en la cuenta
   const registerUrl = `/registro?next=${encodeURIComponent(`/panel/${initial.token}`)}`;
   const [template, setTemplate] = useState<TemplateId>(initial.template);
@@ -250,6 +252,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
       </header>
 
       <div className="mx-auto max-w-7xl px-4 pt-6 pb-24 lg:pb-6">
+        {unverifiedEmail && !initial.paid && <VerifyNotice email={unverifiedEmail} />}
         {initial.paid ? (
           tab === "compartir" && (
           <div className="mb-6 rounded-2xl border border-rule bg-card p-5">

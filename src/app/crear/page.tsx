@@ -2,13 +2,17 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import CreateButton from "@/components/CreateButton";
 import TemplateCard from "@/components/TemplateCard";
+import TrackSource from "@/components/TrackSource";
 import { currentUser } from "@/lib/auth";
 import { getByToken } from "@/lib/db";
 import { trackVisit } from "@/lib/stats";
 import { BRAND, TEMPLATES } from "@/lib/templates";
 
-export default async function Crear({ searchParams }: { searchParams: Promise<{ plantilla?: string }> }) {
-  const { plantilla } = await searchParams;
+export default async function Crear({ searchParams }: { searchParams: Promise<{ plantilla?: string; n1?: string; n2?: string }> }) {
+  const { plantilla, n1, n2 } = await searchParams;
+  // Nombres escritos en la portada: se enseñan en las miniaturas y quedan ya puestos en la invitación
+  const names = { name1: n1?.slice(0, 40), name2: n2?.slice(0, 40) };
+  const demoQuery = new URLSearchParams({ ...(names.name1 && { n1: names.name1 }), ...(names.name2 && { n2: names.name2 }) }).toString();
   await trackVisit("elegir");
   // Se puede empezar sin cuenta. Si ya hay un borrador a medias en este navegador, se ofrece seguir con él.
   const user = await currentUser();
@@ -18,6 +22,7 @@ export default async function Crear({ searchParams }: { searchParams: Promise<{ 
   const templates = [...TEMPLATES].sort((a, b) => Number(b.id === plantilla) - Number(a.id === plantilla));
   return (
     <main className="mx-auto max-w-6xl px-6 py-8">
+      <TrackSource />
       <Link href="/" className="font-serif text-2xl italic">
         {BRAND}
       </Link>
@@ -36,10 +41,10 @@ export default async function Crear({ searchParams }: { searchParams: Promise<{ 
       <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
         {templates.map((t) => (
           <div key={t.id} className={t.id === plantilla ? "rounded-2xl ring-2 ring-brand ring-offset-4 ring-offset-paper" : ""}>
-            <TemplateCard t={t} />
+            <TemplateCard t={t} names={names} />
             <div className="mt-3 flex flex-col gap-2">
-              <CreateButton template={t.id} />
-              <Link href={`/demo/${t.id}`} className="text-center text-sm text-soft underline">
+              <CreateButton template={t.id} names={names} />
+              <Link href={`/demo/${t.id}${demoQuery ? `?${demoQuery}` : ""}`} className="text-center text-sm text-soft underline">
                 Ver ejemplo
               </Link>
             </div>
