@@ -49,9 +49,6 @@ export default async function Estadisticas() {
           {BRAND}
         </Link>
         <div className="flex items-center gap-4">
-          <Link href="/cuenta?ver=invitaciones" className="underline">
-            Mis invitaciones
-          </Link>
           <span className="hidden text-soft sm:inline">{user.email}</span>
           <LogoutButton />
         </div>

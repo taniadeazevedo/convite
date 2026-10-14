@@ -14,6 +14,8 @@ export async function GET() {
   // Se empaquetan las copias de la base de datos y las fotos; la base de datos «en vivo» se deja fuera
   // porque copiarla mientras se usa puede dar un archivo a medias.
   const tar = spawn("tar", ["-czf", "-", "-C", DATA_DIR, "copias", "uploads"]);
+  // Sin este aviso, un fallo al lanzar «tar» (por ejemplo, si no está instalado) cerraría el servidor entero
+  tar.on("error", (e) => console.error("Copia completa:", e));
   const day = new Date().toISOString().slice(0, 10);
   return new Response(Readable.toWeb(tar.stdout) as ReadableStream, {
     headers: {

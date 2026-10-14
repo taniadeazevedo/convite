@@ -6,16 +6,30 @@ import { currentUser } from "@/lib/auth";
 import { dailyCleanup } from "@/lib/cleanup";
 import { countRsvps, listByUser } from "@/lib/db";
 import VerifyNotice from "@/components/VerifyNotice";
-import { isAdmin } from "@/lib/stats";
+import { isAdmin, isAdminEmail } from "@/lib/stats";
 import { BRAND, formatDate, getTemplate } from "@/lib/templates";
 
 export const metadata = { title: `Mi cuenta · ${BRAND}`, robots: { index: false } };
 
-export default async function Cuenta({ searchParams }: { searchParams: Promise<{ ver?: string }> }) {
+export default async function Cuenta() {
   const user = await currentUser();
   if (!user) redirect("/entrar?next=/cuenta");
-  // La administradora entra directamente a las estadísticas; sus invitaciones siguen en /cuenta?ver=invitaciones
-  if (isAdmin(user) && (await searchParams).ver !== "invitaciones") redirect("/cuenta/estadisticas");
+  // La cuenta de administración no es una cuenta de pareja: va siempre a las estadísticas
+  if (isAdmin(user)) redirect("/cuenta/estadisticas");
+  // Si aún no ha confirmado el correo, solo ve el aviso para hacerlo (ni invitaciones ni «Nueva invitación»)
+  if (isAdminEmail(user.email)) {
+    return (
+      <main className="mx-auto max-w-3xl px-6 py-8">
+        <header className="flex items-center justify-between">
+          <Link href="/" className="font-serif text-3xl italic">{BRAND}</Link>
+          <LogoutButton />
+        </header>
+        <h1 className="mt-10 font-serif text-5xl">Administración</h1>
+        <p className="mt-2 mb-6 text-soft">Para ver las estadísticas, confirma primero que este correo es tuyo.</p>
+        <VerifyNotice email={user.email} />
+      </main>
+    );
+  }
   dailyCleanup();
   const invitations = listByUser(user.id);
   return (
