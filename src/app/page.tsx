@@ -1,5 +1,6 @@
 import Link from "next/link";
 import DesignsGrid from "@/components/DesignsGrid";
+import ReviewsCarousel from "@/components/ReviewsCarousel";
 import TrackSource from "@/components/TrackSource";
 import TemplatePhone from "@/components/TemplatePhone";
 import { LEGAL_LINKS } from "@/components/LegalPage";
@@ -247,21 +248,8 @@ export default async function Home() {
       {REVIEWS.length > 0 && (
         <section className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-center font-serif text-5xl">Lo que dicen las parejas</h2>
-          <p className="mt-3 text-center text-sm text-soft">
-            Opiniones de parejas a las que hicimos su web de boda antes de lanzar {BRAND}.
-          </p>
-          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {REVIEWS.map((r) => (
-              <figure key={r.name} className="rounded-3xl border border-rule bg-card p-7">
-                <div className="text-brand">★★★★★</div>
-                <blockquote className="mt-3">
-                  <p className="font-serif text-2xl leading-snug">«{r.title}»</p>
-                  <p className="mt-2 text-soft">{r.text}</p>
-                </blockquote>
-                <figcaption className="mt-4 text-sm font-medium">{r.name}</figcaption>
-              </figure>
-            ))}
-          </div>
+          <ReviewsCarousel reviews={REVIEWS} />
+          <p className="mt-6 text-center text-xs text-soft">Opiniones reales de parejas, publicadas con su permiso.</p>
         </section>
       )}
 
