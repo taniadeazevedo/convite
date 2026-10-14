@@ -1,5 +1,6 @@
 import { countRsvps, getBySlug, getUserById, saveRsvp } from "@/lib/db";
 import { sendEmail, siteOrigin } from "@/lib/email";
+import { isAfterWedding } from "@/lib/templates";
 
 const MAX_RSVPS = 500;
 
@@ -7,6 +8,10 @@ export async function POST(req: Request, ctx: { params: Promise<{ slug: string }
   const { slug } = await ctx.params;
   const inv = getBySlug(slug);
   if (!inv || !inv.paid || inv.data.off.includes("rsvp")) return Response.json({ error: "Invitación no disponible" }, { status: 404 });
+
+  if (isAfterWedding(inv.data.date)) {
+    return Response.json({ error: "La boda ya se celebró y no se aceptan más respuestas" }, { status: 410 });
+  }
 
   const body = await req.json().catch(() => null);
   // Campo trampa relleno = bot: se responde OK sin guardar nada

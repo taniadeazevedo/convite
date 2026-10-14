@@ -2,6 +2,8 @@ import FitText from "./FitText";
 import { formatDate, formatDateDots, type InvitationData, type Template } from "@/lib/templates";
 
 export type HeroProps = {
+  // La boda ya pasó: «nos casamos» pasa a «nos hemos casado»
+  married?: boolean;
   t: Template;
   data: InvitationData;
   name1: string;
@@ -43,7 +45,7 @@ function HeroArco(p: HeroProps) {
   const { t, data, name1, name2 } = p;
   return (
     <header className={`flex flex-col items-center justify-center gap-7 px-6 py-16 text-center ${full(p)}`}>
-      <p className={label} style={{ color: t.muted }}>nos casamos</p>
+      <p className={label} style={{ color: t.muted }}>{p.married ? "nos hemos casado" : "nos casamos"}</p>
       <div className="rounded-t-full p-2" style={{ border: `1px solid ${t.accent}` }}>
         <div className="h-88 w-64 overflow-hidden rounded-t-full">
           <Photo t={t} src={data.cover} name1={name1} name2={name2} className="h-full w-full" />
@@ -68,7 +70,7 @@ function HeroPolaroid(p: HeroProps) {
   const { t, data, name1, name2 } = p;
   return (
     <header className={`flex flex-col items-center justify-center gap-8 overflow-hidden px-6 py-16 text-center ${full(p)}`}>
-      <p className="text-3xl" style={{ fontFamily: t.titleFont, color: t.accent }}>¡nos casamos!</p>
+      <p className="text-3xl" style={{ fontFamily: t.titleFont, color: t.accent }}>{p.married ? "¡nos hemos casado!" : "¡nos casamos!"}</p>
       <div className="relative">
         {/* segunda polaroid asomando por detrás */}
         <div className="absolute inset-0 translate-x-6 rotate-6 bg-white shadow-lg" />
@@ -191,7 +193,7 @@ function HeroCurva(p: HeroProps) {
         </div>
       </div>
       <div className="flex flex-1 flex-col items-center justify-center gap-5 px-6 py-10">
-        <p className={label} style={{ color: t.accent }}>{data.city || "nos casamos"}</p>
+        <p className={label} style={{ color: t.accent }}>{data.city || (p.married ? "nos hemos casado" : "nos casamos")}</p>
         <h1 className={`max-w-full text-5xl leading-tight break-words sm:text-6xl ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>
           {name1} <span className="italic" style={{ color: t.accent }}>&</span> {name2}
         </h1>
@@ -242,7 +244,7 @@ function HeroCollage(p: HeroProps) {
   return (
     <header className={`flex flex-col justify-center gap-8 overflow-hidden px-6 py-14 ${full(p)}`}>
       <p className="text-[11px] uppercase tracking-[0.3em]" style={{ color: t.accent, fontFamily: t.labelFont }}>
-        ✂ nos casamos — {data.city || "guardad la fecha"}
+        ✂ {p.married ? "nos hemos casado" : "nos casamos"} — {data.city || "guardad la fecha"}
       </p>
       <div className="relative mx-auto h-[23rem] w-full max-w-sm">
         {extra(0, "top-0 right-0 h-44 w-36 rotate-6")}
@@ -313,7 +315,7 @@ function HeroPop(p: HeroProps) {
   return (
     <header className={`flex flex-col justify-center gap-6 overflow-hidden px-5 py-12 ${full(p)}`}>
       <div className="flex items-center justify-between text-xs font-bold uppercase">
-        <span className="rounded-full px-3 py-1" style={{ background: t.text, color: t.bg }}>¡nos casamos!</span>
+        <span className="rounded-full px-3 py-1" style={{ background: t.text, color: t.bg }}>{p.married ? "¡nos hemos casado!" : "¡nos casamos!"}</span>
         <span>{formatDateDots(data.date).replace(/ · /g, "/") || "muy pronto"}</span>
       </div>
       <FitText max={150} className={`leading-[0.84] ${t.titleClass}`} style={{ fontFamily: t.titleFont }}>

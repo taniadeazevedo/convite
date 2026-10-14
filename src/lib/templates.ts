@@ -336,6 +336,16 @@ export function mapsLink(b: EventBlock): string {
   return q ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}` : "";
 }
 
+// Fecha de hoy en España (AAAA-MM-DD), para que «después de la boda» cambie a medianoche de aquí
+export function todayInSpain(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Madrid" }).format(new Date());
+}
+
+// La boda ya pasó: desde el día siguiente a la fecha (el mismo día todavía cuenta como «antes»)
+export function isAfterWedding(date: string, today = todayInSpain()): boolean {
+  return Boolean(date) && today > date;
+}
+
 export function formatDate(date: string): string {
   if (!date) return "";
   const d = new Date(date + "T12:00:00");

@@ -9,6 +9,8 @@ import {
   BRAND,
   PLANS,
   PRICE_LABEL,
+  isAfterWedding,
+  todayInSpain,
   UPGRADE_LABEL,
   type PlanId,
   SECTIONS,
@@ -83,6 +85,12 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
   const [copied, setCopied] = useState(false);
   // Se pone a true si se pulsa «Publicar» sin haber marcado la casilla de los términos
   const [needAccept, setNeedAccept] = useState(false);
+  // Hoy en España, para que la vista previa muestre la invitación «después de la boda» si la fecha ya pasó
+  const [today, setToday] = useState("");
+  useEffect(() => {
+    const id = setTimeout(() => setToday(todayInSpain()), 0);
+    return () => clearTimeout(id);
+  }, []);
   const acceptRef = useRef<HTMLLabelElement>(null);
   // Plan elegido para publicar; una vez publicada, el que tiene contratado
   const [plan, setPlan] = useState<PlanId>(initial.plan);
@@ -750,7 +758,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
                 <div className="mb-2 text-center text-xs uppercase tracking-wider text-soft">Así la verán en el móvil</div>
                 <div className="mx-auto h-[calc(100svh-11rem)] max-w-[400px] overflow-y-auto rounded-[2rem] border-8 border-ink bg-white lg:h-[calc(100svh-9rem)]">
                   {/* En Premium (contratado, o elegido para publicar) la vista previa tampoco lleva «Hecha con Invitalia» */}
-                  <Invitation template={template} data={data} mode="preview" embedded branding={plan !== "premium"} />
+                  <Invitation template={template} data={data} mode="preview" embedded branding={plan !== "premium"} afterWedding={Boolean(today) && isAfterWedding(data.date, today)} />
                 </div>
               </div>
             </aside>

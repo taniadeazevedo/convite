@@ -26,6 +26,8 @@ type Props = {
   embedded?: boolean;
   // false en el plan Premium: no se muestra «Hecha con Invitalia»
   branding?: boolean;
+  // La boda ya pasó: se quita lo que solo sirve antes (confirmar asistencia, horarios, alojamiento…)
+  afterWedding?: boolean;
 };
 
 const label = "text-[11px] uppercase tracking-[0.4em]";
@@ -373,14 +375,16 @@ function RsvpForm({ t, data, mode, slug }: { t: Template; data: InvitationData; 
   );
 }
 
-export default function Invitation({ template, data, mode, slug, embedded, branding = true }: Props) {
+export default function Invitation({ template, data, mode, slug, embedded, branding = true, afterWedding = false }: Props) {
   const t = getTemplate(template);
   const name1 = data.name1 || "Nombre";
   const name2 = data.name2 || "Nombre";
   const hasEvents = data.ceremony.place || data.ceremony.time || data.party.place || data.party.time;
   const Hero = HEROES[t.hero];
   const left = t.align === "left";
-  const on = (id: SectionId) => !data.off.includes(id);
+  // Secciones que ya no tienen sentido cuando la boda ha pasado
+  const beforeOnly: SectionId[] = ["events", "timeline", "travel", "faq", "rsvp"];
+  const on = (id: SectionId) => !data.off.includes(id) && !(afterWedding && beforeOnly.includes(id));
   const block = left ? "" : "mx-auto";
   const cardRadius = t.radius === "999px" ? "1.5rem" : t.radius;
   const plainMessage = t.hero === "pop" || t.hero === "revista";
@@ -391,15 +395,20 @@ export default function Invitation({ template, data, mode, slug, embedded, brand
       className={`${embedded ? "" : "min-h-svh"} ${t.grain ? "grain" : ""}`}
     >
       <div className="mx-auto max-w-2xl">
-        <Hero t={t} data={data} name1={name1} name2={name2} embedded={embedded} />
+        <Hero t={t} data={data} name1={name1} name2={name2} embedded={embedded} married={afterWedding} />
 
         {(on("countdown") || data.message) && (
           <section className={`px-6 py-16 ${left ? "text-left" : "text-center"}`} style={{ borderTop: `1px solid ${t.line}` }}>
             <Reveal off={embedded}>
               {on("countdown") && (
                 <>
-                  <p className={`mb-6 ${label}`} style={{ color: t.muted, fontFamily: t.labelFont }}>Faltan</p>
+                  {!afterWedding && <p className={`mb-6 ${label}`} style={{ color: t.muted, fontFamily: t.labelFont }}>Faltan</p>}
                   <Countdown date={data.date} t={t} />
+                  {afterWedding && (
+                    <p className={`mt-4 max-w-md text-lg leading-relaxed ${block}`} style={{ color: t.muted }}>
+                      Gracias por acompañarnos en un día tan especial.
+                    </p>
+                  )}
                 </>
               )}
               {data.message && (
