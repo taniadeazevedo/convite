@@ -3,7 +3,8 @@
 // Palabras que no pueden usarse porque ya son páginas de la web
 const RESERVED = new Set([
   "api", "crear", "cuenta", "demo", "entrar", "i", "legal", "panel", "recuperar", "registro", "restablecer",
-  "admin", "invitalia", "verificar", "www", "favicon", "robots", "sitemap", "opengraph-image", "precio", "ayuda", "contacto",
+  "admin", "invitalia", "verificar", "blog", "guias",
+  "invitaciones-de-boda-digitales", "invitacion-boda-whatsapp", "confirmacion-asistencia-boda", "www", "favicon", "robots", "sitemap", "opengraph-image", "precio", "ayuda", "contacto",
 ]);
 
 // Quita tildes y símbolos: "Lucía & Marcos" -> "lucia-marcos"

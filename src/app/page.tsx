@@ -1,9 +1,9 @@
 import Link from "next/link";
 import DesignsGrid from "@/components/DesignsGrid";
+import SiteFooter from "@/components/site/SiteFooter";
 import ReviewsCarousel from "@/components/ReviewsCarousel";
 import TrackSource from "@/components/TrackSource";
 import TemplatePhone from "@/components/TemplatePhone";
-import { LEGAL_LINKS } from "@/components/LegalPage";
 import { LEGAL } from "@/lib/legal";
 import { dailyCleanup } from "@/lib/cleanup";
 import { trackVisit } from "@/lib/stats";
@@ -121,6 +121,7 @@ export default async function Home() {
           <a href="#disenos">Diseños</a>
           <a href="#como">Cómo funciona</a>
           <a href="#precio">Precio</a>
+          <Link href="/blog">Guías</Link>
         </nav>
         <div className="flex items-center gap-4">
           <Link href="/entrar" className="text-sm font-medium">
@@ -332,22 +333,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <footer className="border-t border-rule px-6 py-8 text-center text-sm text-soft">
-        <nav className="mb-3 flex flex-wrap justify-center gap-x-5 gap-y-2">
-          {LEGAL_LINKS.map(([href, label]) => (
-            <Link key={href} href={href} className="underline">
-              {label}
-            </Link>
-          ))}
-        </nav>
-        <p className="mb-3">
-          ¿Dudas? Escríbenos a{" "}
-          <a href={`mailto:${LEGAL.email}`} className="underline">
-            {LEGAL.email}
-          </a>
-        </p>
-        © {new Date().getFullYear()} {BRAND} · Fotos de ejemplo de Unsplash
-      </footer>
+      <SiteFooter />
     </main>
   );
 }
