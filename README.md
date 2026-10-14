@@ -38,6 +38,12 @@ La web guarda los datos en un archivo SQLite y las fotos en disco, así que nece
 4. Settings → Networking → Generate Domain (o conectar tu dominio).
 5. En Stripe: Developers → Webhooks → añadir `https://tu-dominio/api/stripe/webhook` con el evento `checkout.session.completed`, y copiar su secreto a `STRIPE_WEBHOOK_SECRET`.
 
+## Despliegue automático
+
+Railway publica solo cada cambio que llega a la rama `main`, siempre que la app **Railway App** esté *instalada* en GitHub con acceso a este repositorio (github.com/settings/installations). Si deja de desplegar, revisa eso primero.
+
+Para saber qué versión está publicada: `https://www.invitalia.es/api/salud`.
+
 ## Correos (Resend)
 
 El código ya envía los correos con Resend en cuanto encuentra las dos variables. Pasos:
