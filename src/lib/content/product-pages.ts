@@ -150,6 +150,176 @@ export const PRODUCT_PAGES: ProductPage[] = [
       ["¿Y si alguien no tiene móvil?", "Puede confirmar desde el móvil de un familiar o desde cualquier ordenador, porque la invitación es una web normal. Y si os lo dice en persona, apuntadlo en vuestra lista descargada."],
     ],
   },
+
+  {
+    slug: "invitaciones-boda-boho",
+    title: "Invitaciones de boda boho",
+    seoTitle: "Invitaciones de boda boho digitales | Invitalia",
+    description:
+      "Invitaciones de boda boho en digital: tonos tierra, formas orgánicas y letra manuscrita. Con confirmación de asistencia y mapa. Probadlas con vuestros nombres.",
+    eyebrow: "Estilo boho",
+    intro:
+      "Las bodas boho tienen algo de campo, de tarde larga y de mesa compartida: tonos tierra, flores secas, telas naturales y nada demasiado rígido. La invitación es lo primero que lo anuncia, así que conviene que respire ese mismo aire.",
+    featured: ["terracota", "salvia", "lino"],
+    blocks: [
+      { type: "h2", text: "Los diseños con más alma boho" },
+      {
+        type: "ul",
+        items: [
+          "Terracota: círculos suaves en tonos tierra y titulares en cursiva. Es el más boho de todos.",
+          "Salvia: verde salvia, fotos tipo polaroid y letra manuscrita, como un álbum hecho a mano.",
+          "Lino: más sobrio, con la foto en arco y una serif elegante; funciona en bodas boho más depuradas.",
+        ],
+      },
+      { type: "h2", text: "Ideas para que el texto también sea boho" },
+      {
+        type: "p",
+        text: "El estilo boho pide un tono cercano. Funcionan bien las frases cortas, hablar en primera persona y alguna referencia al lugar o a la estación.",
+      },
+      { type: "quote", text: "Nos casamos al aire libre, entre olivos y con los pies en la hierba. Ven con ganas de celebrar y con calzado cómodo." },
+      { type: "quote", text: "Una tarde de septiembre, una finca en el campo y la gente que más queremos. Solo faltas tú." },
+      { type: "cta", text: "Probad los diseños boho con vuestros nombres" },
+      { type: "h2", text: "Detalles prácticos que suelen tener las bodas boho" },
+      {
+        type: "p",
+        text: "Muchas se celebran en fincas fuera de la ciudad, así que la sección de autobuses y alojamiento cobra importancia. Y si la ceremonia es al aire libre, el cronograma ayuda a que los invitados sepan a qué hora conviene llegar y qué ponerse.",
+      },
+    ],
+    faq: [
+      ["¿Puedo usar mis propias fotos?", "Sí. Subís vuestras fotos y el diseño las enmarca con su estilo: en polaroid, en círculo o en arco, según el que elijáis."],
+      ["¿Puedo cambiar de diseño antes de enviarla?", "Sí, todas las veces que queráis sin perder lo escrito. Al publicarla, el diseño queda fijado."],
+    ],
+  },
+  {
+    slug: "invitaciones-boda-elegantes",
+    title: "Invitaciones de boda elegantes y minimalistas",
+    seoTitle: "Invitaciones de boda elegantes y minimalistas | Invitalia",
+    description:
+      "Invitaciones de boda elegantes en digital: tipografía serif, mucho aire y fotos en blanco y negro. Con confirmación de asistencia. Probadlas gratis.",
+    eyebrow: "Elegante y minimalista",
+    intro:
+      "Una invitación elegante no necesita adornos: le bastan buena tipografía, espacio en blanco y una foto bien elegida. Si vuestra boda es de noche, en un palacio o simplemente os gusta lo sobrio, estos son los diseños que mejor lo transmiten.",
+    featured: ["lino", "editorial", "medianoche"],
+    blocks: [
+      { type: "h2", text: "Tres formas de ser elegante" },
+      {
+        type: "ul",
+        items: [
+          "Lino: tonos crema, foto en arco y serif en cursiva. Clásico y delicado.",
+          "Editorial: blanco y negro, como la portada de una revista. Minimalista y moderno.",
+          "Medianoche: fondo oscuro y foto a pantalla completa. Pensado para bodas de noche o de etiqueta.",
+        ],
+      },
+      { type: "h2", text: "Qué hace que una invitación parezca elegante" },
+      {
+        type: "ul",
+        items: [
+          "Pocos colores: uno de fondo, uno para el texto y, como mucho, un acento.",
+          "Textos cortos. La elegancia está en lo que no se dice.",
+          "Una sola foto buena antes que muchas regulares.",
+          "Ocultar las secciones que no uséis: una invitación con huecos vacíos pierde mucho.",
+        ],
+      },
+      { type: "quote", text: "Tenemos el placer de invitaros a celebrar nuestra boda el sábado 12 de junio a las siete de la tarde." },
+      { type: "cta", text: "Probad los diseños elegantes con vuestros nombres" },
+      { type: "h2", text: "Código de vestimenta" },
+      {
+        type: "p",
+        text: "Si la boda es de etiqueta o de cóctel, decidlo claramente en la sección de preguntas frecuentes de la invitación. Es de las dudas que más mensajes os ahorrará.",
+      },
+    ],
+    faq: [
+      ["¿Se puede quitar la cuenta atrás o la galería?", "Sí. Cada sección tiene un interruptor y, si la ocultáis, no aparece."],
+      ["¿Sale la marca de Invitalia?", "En el plan Esencial aparece una línea discreta al final. En Premium no aparece."],
+    ],
+  },
+  {
+    slug: "invitaciones-boda-mediterranea",
+    title: "Invitaciones para bodas mediterráneas y en la playa",
+    seoTitle: "Invitaciones de boda mediterránea y en la playa | Invitalia",
+    description:
+      "Invitaciones de boda de estilo mediterráneo para bodas de verano, en la costa o en una isla. Con mapa, alojamiento y confirmación. Probadlas gratis.",
+    eyebrow: "Verano y mar",
+    intro:
+      "Azul, limones, sol de tarde y el mar de fondo. Si os casáis en la costa, en una isla o simplemente en pleno verano, la invitación puede empezar a contar ese viaje antes de que vuestros invitados hagan la maleta.",
+    featured: ["riviera", "postal"],
+    blocks: [
+      { type: "h2", text: "Los diseños más mediterráneos" },
+      {
+        type: "ul",
+        items: [
+          "Riviera: azul y amarillo limón, como una postal de la costa en verano.",
+          "Postal: una tarjeta de embarque con vuestros nombres. Perfecta si la boda implica viajar.",
+        ],
+      },
+      { type: "h2", text: "Lo que más agradecen los invitados en una boda de destino" },
+      {
+        type: "ul",
+        items: [
+          "Saber la fecha con mucha antelación: lo ideal es avisar entre 6 y 12 meses antes.",
+          "Recomendaciones de alojamiento cerca del lugar de la boda.",
+          "Cómo llegar: aeropuerto o puerto más cercano y si habrá autobuses.",
+          "El horario del día, para saber si da tiempo a ir a la playa antes.",
+        ],
+      },
+      {
+        type: "p",
+        text: "Todo eso cabe en las secciones de alojamiento, transporte y cronograma de la invitación, y lo podéis ir completando poco a poco: los cambios se ven al momento.",
+      },
+      { type: "cta", text: "Probad los diseños de verano con vuestros nombres" },
+      { type: "quote", text: "Nos casamos frente al mar. Guardad el 12 de junio, preparad la maleta y venid con ganas de celebrar." },
+    ],
+    faq: [
+      ["¿Puedo enviarla antes de tener todos los detalles?", "Sí. Podéis publicarla con la fecha y el lugar y añadir el alojamiento o los autobuses más adelante."],
+      ["¿Funciona para invitados de fuera de España?", "El enlace se abre desde cualquier país. Los textos de la invitación los escribís vosotros, así que podéis incluir una versión en otro idioma en el mensaje de bienvenida."],
+    ],
+  },
+  {
+    slug: "album-fotos-boda-qr",
+    title: "Álbum de fotos de boda con código QR",
+    seoTitle: "Álbum de fotos de boda con código QR para invitados | Invitalia",
+    description:
+      "Recoged las fotos que hacen vuestros invitados con un código QR en las mesas. Sin apps ni registro: escanean, suben y os llegan solo a vosotros.",
+    eyebrow: "Las fotos de todos, en un sitio",
+    intro:
+      "En cada boda se hacen cientos de fotos con el móvil, y la mayoría se quedan en el carrete de los invitados. Con un código QR en las mesas, cualquiera puede subir las suyas en un momento y os llegan directamente a vosotros.",
+    blocks: [
+      { type: "h2", text: "Cómo funciona" },
+      {
+        type: "ol",
+        items: [
+          "Al publicar vuestra invitación, en vuestro panel tenéis un cartel con el código QR, con el mismo diseño que la invitación.",
+          "Lo imprimís en tamaño A5 y lo ponéis en las mesas, en la entrada o junto al photocall.",
+          "Los invitados apuntan con la cámara del móvil, eligen sus fotos y las suben. No necesitan instalar nada ni registrarse.",
+          "Las fotos aparecen en vuestro panel y las podéis descargar una a una cuando queráis.",
+        ],
+      },
+      { type: "h2", text: "Ventajas frente a un grupo de WhatsApp" },
+      {
+        type: "ul",
+        items: [
+          "Las fotos se guardan en buena resolución, sin la compresión que sufren al reenviarlas por WhatsApp.",
+          "No hace falta tener el número de cada invitado ni crear un grupo enorme.",
+          "Solo las veis vosotros, no todos los invitados.",
+        ],
+      },
+      { type: "cta", text: "Cread vuestra invitación con álbum incluido" },
+      { type: "h2", text: "Consejos para que la gente suba fotos" },
+      {
+        type: "ul",
+        items: [
+          "Poned varios carteles: uno por mesa funciona mucho mejor que uno solo en la entrada.",
+          "Que el maestro de ceremonias o el DJ lo recuerden durante la fiesta.",
+          "Al día siguiente, enviad el enlace de la invitación con un mensaje de agradecimiento: la sección de fotos sigue activa.",
+        ],
+      },
+    ],
+    faq: [
+      ["¿Cuántas fotos pueden subir?", `Hasta ${PLANS.basico.guestPhotos} por boda en el plan ${PLANS.basico.name} y hasta ${PLANS.premium.guestPhotos} en ${PLANS.premium.name}.`],
+      ["¿Los invitados ven las fotos de los demás?", "No. Solo vosotros las veis, desde vuestro panel."],
+      ["¿Hasta cuándo pueden subirlas?", `Mientras la invitación esté publicada: ${PLANS.basico.months} meses en ${PLANS.basico.name} y ${PLANS.premium.months} en ${PLANS.premium.name}.`],
+    ],
+  },
 ];
 
 export const getProductPage = (slug: string) => PRODUCT_PAGES.find((p) => p.slug === slug);

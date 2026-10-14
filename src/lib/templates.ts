@@ -210,7 +210,7 @@ export function emptyData(): InvitationData {
 }
 
 // Fotos de ejemplo (de Unsplash, licencia gratuita), guardadas en public/muestras
-export const SAMPLE_PHOTOS = Array.from({ length: 14 }, (_, i) => `/muestras/${String(i + 1).padStart(2, "0")}.jpg`);
+export const SAMPLE_PHOTOS = Array.from({ length: 14 }, (_, i) => `/muestras/${String(i + 1).padStart(2, "0")}.webp`); // WebP: pesan menos en el móvil
 
 export function sampleData(templateId?: string): InvitationData {
   // Cada plantilla enseña fotos distintas para que las miniaturas no se repitan

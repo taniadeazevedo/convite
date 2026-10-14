@@ -4,7 +4,8 @@
 const RESERVED = new Set([
   "api", "crear", "cuenta", "demo", "entrar", "i", "legal", "panel", "recuperar", "registro", "restablecer",
   "admin", "invitalia", "verificar", "blog", "guias",
-  "invitaciones-de-boda-digitales", "invitacion-boda-whatsapp", "confirmacion-asistencia-boda", "www", "favicon", "robots", "sitemap", "opengraph-image", "precio", "ayuda", "contacto",
+  "invitaciones-de-boda-digitales", "invitacion-boda-whatsapp", "confirmacion-asistencia-boda",
+  "invitaciones-boda-boho", "invitaciones-boda-elegantes", "invitaciones-boda-mediterranea", "album-fotos-boda-qr", "www", "favicon", "robots", "sitemap", "opengraph-image", "precio", "ayuda", "contacto",
 ]);
 
 // Quita tildes y símbolos: "Lucía & Marcos" -> "lucia-marcos"

@@ -7,12 +7,15 @@ import { TEMPLATES } from "@/lib/templates";
 
 // Los diez diseños de la portada. La pareja puede escribir sus nombres y verlos al momento en todos;
 // los nombres viajan después a la demo y al editor, para no tener que escribirlos otra vez.
-export default function DesignsGrid() {
+// featured: diseños que se enseñan primero (en las páginas de un estilo concreto)
+export default function DesignsGrid({ featured = [] }: { featured?: string[] }) {
   const [name1, setName1] = useState("");
   const [name2, setName2] = useState("");
   const n1 = name1.trim();
   const n2 = name2.trim();
   const query = new URLSearchParams({ ...(n1 && { n1 }), ...(n2 && { n2 }) }).toString();
+  // Posición de cada diseño: primero los destacados, en el orden en que se indican; luego el resto
+  const rank = (id: string) => (featured.includes(id) ? featured.indexOf(id) : featured.length);
   const withNames = (path: string) => (query ? `${path}${path.includes("?") ? "&" : "?"}${query}` : path);
 
   return (
@@ -48,7 +51,7 @@ export default function DesignsGrid() {
       </div>
       <p className="mt-6 text-center text-soft">Toca cualquiera para verla completa, como la vería un invitado.</p>
       <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
-        {TEMPLATES.map((t) => (
+        {[...TEMPLATES].sort((a, b) => rank(a.id) - rank(b.id)).map((t) => (
           <TemplateCard key={t.id} t={t} href={withNames(`/demo/${t.id}`)} names={{ name1: n1, name2: n2 }} />
         ))}
       </div>

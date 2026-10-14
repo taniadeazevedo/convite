@@ -4,6 +4,211 @@ import type { Article } from "./types";
 // Para añadir una, copia la estructura de otra, cambia el «slug» (la dirección) y escribe los bloques.
 export const ARTICLES: Article[] = [
   {
+    slug: "papeles-para-casarse-en-espana",
+    title: "Papeles para casarse en España: boda civil y por la iglesia",
+    seoTitle: "Papeles para casarse en España: civil y por la iglesia",
+    description:
+      "Qué documentos necesitáis para casaros por lo civil o por la iglesia en España, dónde se piden, con cuánta antelación empezar y qué cambia si sois extranjeros o divorciados.",
+    date: "2026-10-14",
+    readingMinutes: 8,
+    intro:
+      "El papeleo es lo que más se retrasa y lo que más nervios da. La buena noticia es que siempre sigue el mismo esquema: reunir unos documentos, abrir un expediente y esperar a que lo aprueben. Aquí tenéis el mapa completo para que sepáis qué pedir, dónde y cuándo.",
+    blocks: [
+      { type: "h2", text: "Lo primero: cuánta antelación necesitáis" },
+      {
+        type: "ul",
+        items: [
+          "Boda civil: empezad el expediente entre 4 y 6 meses antes. En ciudades grandes las citas del Registro Civil tardan.",
+          "Boda por la iglesia: unos 6 meses antes, porque además del expediente hay que hacer el cursillo prematrimonial.",
+          "Si alguno de los dos es extranjero o nació fuera de España: sumad dos o tres meses, por las legalizaciones y traducciones.",
+        ],
+      },
+      {
+        type: "p",
+        text: "Ojo con no empezar demasiado pronto: varios documentos tienen fecha de caducidad (normalmente entre tres meses y un año, según la oficina) y, una vez abierto el expediente, la boda suele tener que celebrarse en un plazo máximo, que en muchos registros es de un año.",
+      },
+
+      { type: "h2", text: "Boda civil: el expediente matrimonial" },
+      {
+        type: "p",
+        text: "Para casaros por lo civil hay que tramitar antes un expediente matrimonial, que sirve para comprobar que no hay ningún impedimento legal (por ejemplo, un matrimonio anterior sin disolver). Se puede hacer en el Registro Civil o ante notario.",
+      },
+      { type: "h3", text: "Dónde se tramita" },
+      {
+        type: "ul",
+        items: [
+          "En el Registro Civil del municipio donde está empadronado alguno de los dos. Hay que pedir cita previa; esa cita es solo para abrir el expediente, no es la boda.",
+          "Ante notario: os dirigís al colegio notarial de vuestra comunidad, que os asigna un notario. El notario se encarga también de inscribir después el matrimonio. Tiene coste, pero suele ser más rápido.",
+        ],
+      },
+      { type: "h3", text: "Documentos habituales" },
+      {
+        type: "ul",
+        items: [
+          "DNI, NIE o pasaporte de los dos (original y copia).",
+          "Certificado literal de nacimiento de cada uno, que se pide en el Registro Civil donde nacisteis (también por internet en la sede electrónica del Ministerio de Justicia).",
+          "Certificado de empadronamiento, que en muchos registros debe cubrir los últimos dos años.",
+          "Declaración de estado civil (soltero, divorciado o viudo), que suele firmarse en el propio registro.",
+          "Uno o dos testigos mayores de edad que os conozcan, con su documento de identidad.",
+        ],
+      },
+      {
+        type: "p",
+        text: "Cada Registro Civil publica su lista exacta y puede pedir algo más o fijar otros plazos de validez. Antes de pedir cita, consultad la del vuestro: os ahorrará volver.",
+      },
+      { type: "h3", text: "Quién os puede casar" },
+      {
+        type: "p",
+        text: "Una vez aprobado el expediente, podéis casaros ante el encargado del Registro Civil, un juez de paz, el alcalde o un concejal en quien delegue, o un notario. Si queréis casaros en una finca, preguntad antes al ayuntamiento: no todos ofician fuera de sus instalaciones.",
+      },
+
+      { type: "cta", text: "Mientras llega el papeleo, preparad la invitación" },
+
+      { type: "h2", text: "Boda por la iglesia" },
+      {
+        type: "p",
+        text: "Para una boda católica se abre un expediente matrimonial en la parroquia de alguno de los dos, una vez reservada la fecha en la iglesia donde os vais a casar. La propia parroquia se encarga después de que el matrimonio se inscriba en el Registro Civil, así que no tenéis que hacer una boda civil aparte.",
+      },
+      { type: "h3", text: "Documentos habituales" },
+      {
+        type: "ul",
+        items: [
+          "DNI de los dos.",
+          "Partida de bautismo reciente de cada uno, que se pide en la parroquia donde os bautizaron. Muchas diócesis la piden legalizada por el obispado.",
+          "Certificado literal de nacimiento.",
+          "Fe de vida y estado (certificado de estado civil), del Registro Civil.",
+          "Certificado del cursillo prematrimonial.",
+          "Algunas parroquias piden además el certificado de confirmación.",
+        ],
+      },
+      { type: "h3", text: "El cursillo prematrimonial" },
+      {
+        type: "p",
+        text: "Es obligatorio y lo organizan las parroquias o la diócesis, normalmente en varias sesiones o en un fin de semana. Las plazas se llenan, sobre todo antes de la temporada de bodas: apuntaos con tiempo.",
+      },
+
+      { type: "h2", text: "Casos especiales" },
+      {
+        type: "ul",
+        items: [
+          "Divorciados: hay que aportar la sentencia de divorcio inscrita. Para casarse por la iglesia después de una boda religiosa anterior hace falta la nulidad eclesiástica.",
+          "Viudos: certificado de defunción del cónyuge anterior.",
+          "Extranjeros o nacidos fuera de España: los documentos de vuestro país suelen necesitar apostilla o legalización y traducción jurada. Algunos documentos de la Unión Europea están exentos; preguntad en el registro.",
+        ],
+      },
+
+      { type: "h2", text: "Calendario resumido" },
+      {
+        type: "ol",
+        items: [
+          "6 meses antes: reservar fecha (iglesia o ayuntamiento) y pedir cita para el expediente.",
+          "5 meses antes: reunir documentos y, si es religiosa, apuntarse al cursillo.",
+          "4 meses antes: abrir el expediente.",
+          "1 o 2 meses antes: expediente aprobado; confirmar quién os casa y el lugar.",
+          "Después de la boda: comprobar que el matrimonio está inscrito y pedir el certificado de matrimonio.",
+        ],
+      },
+      {
+        type: "p",
+        text: "Esta guía resume los requisitos habituales, pero cada Registro Civil, notaría y parroquia puede pedir documentos distintos o fijar otros plazos. Confirmadlo siempre en la oficina que os corresponda.",
+      },
+    ],
+    faq: [
+      ["¿Se puede uno casar por lo civil sin estar empadronado en esa ciudad?", "El expediente se abre donde está empadronado alguno de los dos, pero luego se puede celebrar la boda en otro municipio pidiéndolo a ese ayuntamiento o juzgado."],
+      ["¿Casarse ante notario cuesta dinero?", "Sí, a diferencia del Registro Civil, que es gratuito. El precio depende del notario y de si la boda se celebra en su despacho o fuera."],
+      ["¿Hay que hacer boda civil si nos casamos por la iglesia?", "No. El matrimonio católico tiene efectos civiles en España; la parroquia se encarga de que se inscriba en el Registro Civil."],
+    ],
+  },
+  {
+    slug: "checklist-boda-mes-a-mes",
+    title: "Checklist de boda: qué hacer y cuándo, mes a mes",
+    seoTitle: "Checklist de boda mes a mes: qué hacer y cuándo",
+    description:
+      "Lista de tareas para organizar vuestra boda desde 12 meses antes hasta el día después: presupuesto, finca, papeleo, invitaciones, proveedores y última semana.",
+    date: "2026-10-14",
+    readingMinutes: 7,
+    intro:
+      "Organizar una boda son decenas de decisiones, pero no todas a la vez. Esta es la lista en el orden en que conviene hacerlas, para que nada se os escape y no tengáis que correr al final. Si os casáis en menos de un año, empezad por arriba y comprimid los plazos.",
+    blocks: [
+      { type: "h2", text: "12 meses antes" },
+      {
+        type: "ul",
+        items: [
+          "Fijad el presupuesto total y quién aporta qué. Todo lo demás depende de esta cifra.",
+          "Haced una primera lista de invitados: el número de personas decide el tamaño del sitio y la mitad del presupuesto.",
+          "Elegid la fecha y reservad el lugar de la celebración. Las fincas buenas en primavera y verano se reservan con más de un año.",
+          "Si os casáis lejos o en temporada alta, enviad el «save the date».",
+        ],
+      },
+      { type: "h2", text: "Entre 10 y 8 meses antes" },
+      {
+        type: "ul",
+        items: [
+          "Reservad los proveedores que más se agotan: fotógrafo, catering (si la finca no lo incluye) y música.",
+          "Si la boda es religiosa, reservad la iglesia.",
+          "Empezad a buscar el vestido y el traje: entre pruebas y arreglos, algunos tardan seis meses.",
+        ],
+      },
+      { type: "h2", text: "Entre 7 y 5 meses antes" },
+      {
+        type: "ul",
+        items: [
+          "Papeleo: pedid cita para el expediente matrimonial y reunid los documentos.",
+          "Si es por la iglesia, apuntaos al cursillo prematrimonial.",
+          "Contratad flores, decoración y, si hace falta, autobuses para los invitados.",
+          "Reservad el viaje de novios.",
+          "Preparad la invitación: diseño, textos y toda la información práctica.",
+        ],
+      },
+      { type: "cta", text: "Preparad la invitación ahora y enviadla cuando toque" },
+      { type: "h2", text: "Entre 3 y 2 meses antes" },
+      {
+        type: "ul",
+        items: [
+          "Enviad las invitaciones, con una fecha límite para confirmar.",
+          "Prueba de menú con el catering.",
+          "Elegid los anillos y encargad los detalles para invitados, si vais a tenerlos.",
+          "Si queréis, abrid la lista de bodas o decidid cómo indicaréis el número de cuenta.",
+        ],
+      },
+      { type: "h2", text: "1 mes antes" },
+      {
+        type: "ul",
+        items: [
+          "Cerrad el número de invitados y escribid a quien no haya confirmado.",
+          "Pasad al catering la lista definitiva con las alergias e intolerancias.",
+          "Haced el plano de mesas (seating plan).",
+          "Últimas pruebas de vestido y traje.",
+          "Repasad el cronograma del día con la finca, el fotógrafo y la música.",
+        ],
+      },
+      { type: "h2", text: "La última semana" },
+      {
+        type: "ul",
+        items: [
+          "Confirmad horarios con todos los proveedores y dejad sus teléfonos a una persona de confianza.",
+          "Enviad a los invitados un último mensaje con horarios, ubicación y autobuses.",
+          "Preparad los pagos pendientes en sobres o transferencias programadas.",
+          "Imprimid los carteles con código QR para que los invitados suban sus fotos.",
+          "Delegad: el día de la boda, vuestro único trabajo es disfrutarla.",
+        ],
+      },
+      { type: "h2", text: "Después de la boda" },
+      {
+        type: "ul",
+        items: [
+          "Comprobad que el matrimonio está inscrito y pedid el certificado.",
+          "Recopilad las fotos de los invitados y mandad un mensaje de agradecimiento.",
+          "Si cambiáis de estado civil a efectos de empresa, banco o Hacienda, actualizadlo.",
+        ],
+      },
+    ],
+    faq: [
+      ["¿Se puede organizar una boda en seis meses?", "Sí, sobre todo si sois flexibles con la fecha o el día de la semana. Lo más difícil es conseguir finca y fotógrafo en temporada alta; empezad por ahí."],
+      ["¿Qué es lo que más se suele olvidar?", "El papeleo y las alergias de los invitados. Por eso conviene empezar el expediente pronto y preguntar por las alergias en la propia confirmación de asistencia."],
+    ],
+  },
+  {
     slug: "textos-para-invitaciones-de-boda",
     title: "Textos para invitaciones de boda: ejemplos para copiar",
     seoTitle: "Textos para invitaciones de boda: ejemplos para copiar",

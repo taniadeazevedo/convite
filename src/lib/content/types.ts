@@ -35,4 +35,6 @@ export type ProductPage = {
   intro: string;
   blocks: Block[];
   faq: Faq[];
+  // Diseños que encajan con esta página: salen primero en la lista
+  featured?: string[];
 };

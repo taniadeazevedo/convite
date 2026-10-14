@@ -31,8 +31,8 @@ export default function ProductPageView({ page }: { page: ProductPage }) {
         <ContentBlocks blocks={page.blocks} ctaHref="#disenos" />
       </article>
       <section id="disenos" className="mx-auto max-w-6xl scroll-mt-6 px-6 py-16">
-        <h2 className="text-center font-serif text-5xl">Elegid vuestro diseño</h2>
-        <DesignsGrid />
+        <h2 className="text-center font-serif text-5xl">{page.featured?.length ? "Los diseños que mejor encajan" : "Elegid vuestro diseño"}</h2>
+        <DesignsGrid featured={page.featured} />
       </section>
       <section className="mx-auto max-w-2xl px-6 pb-20">
         <h2 className="text-center font-serif text-4xl">Preguntas frecuentes</h2>
