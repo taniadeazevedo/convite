@@ -3,7 +3,7 @@
 // Palabras que no pueden usarse porque ya son páginas de la web
 const RESERVED = new Set([
   "api", "crear", "cuenta", "demo", "entrar", "i", "legal", "panel", "recuperar", "registro", "restablecer",
-  "admin", "invitalia", "verificar", "blog", "guias",
+  "admin", "invitalia", "verificar", "blog", "guias", "pin",
   "invitaciones-de-boda-digitales", "invitacion-boda-whatsapp", "confirmacion-asistencia-boda",
   "invitaciones-boda-boho", "invitaciones-boda-elegantes", "invitaciones-boda-mediterranea", "album-fotos-boda-qr", "invitaciones-boda-romanticas", "invitaciones-boda-originales", "www", "favicon", "robots", "sitemap", "opengraph-image", "precio", "ayuda", "contacto",
 ]);
