@@ -38,6 +38,8 @@ export const metadata: Metadata = {
     "Invitaciones de boda digitales con confirmación de asistencia: elegid diseño, poned vuestros datos y enviadla por WhatsApp. Pago único, sin suscripción.",
   openGraph: { siteName: BRAND, locale: "es_ES", type: "website" },
   twitter: { card: "summary_large_image" },
+  // Verificación del dominio en Pinterest (no quitar: si desaparece, Pinterest deja de reconocer la web)
+  other: { "p:domain_verify": "add85a3ffa43ddc529908c4ccfd63ac2" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
