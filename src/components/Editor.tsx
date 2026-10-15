@@ -352,7 +352,7 @@ export default function Editor({ initial, rsvps, guestPhotos, demoPayments, orig
                       <input type="radio" name="plan" checked={plan === id} onChange={() => setPlan(id)} className="h-4 w-4 accent-[var(--brand)]" />
                       {PLANS[id].name}
                     </span>
-                    <span className="font-serif text-2xl">{PLANS[id].label}</span>
+                    <span className="font-serif text-2xl" style={{ fontVariantNumeric: "lining-nums", fontFeatureSettings: '"lnum"' }}>{PLANS[id].label}</span>
                   </span>
                   <span className="mt-2 block text-soft">
                     {id === "basico"

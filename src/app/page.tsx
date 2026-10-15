@@ -11,6 +11,9 @@ import { countInvitations } from "@/lib/db";
 import { REVIEWS } from "@/lib/reviews";
 import { BRAND, PLANS, PRICE_LABEL, SAMPLE_PHOTOS } from "@/lib/templates";
 
+// Cifras alineadas en los precios: la serif usa por defecto cifras «antiguas» que bajan de la línea y se montan con el texto de debajo
+const LINING = { fontVariantNumeric: "lining-nums", fontFeatureSettings: '"lnum"' } as const;
+
 const photo = (i: number) => SAMPLE_PHOTOS[i % SAMPLE_PHOTOS.length];
 
 const STEPS = [
@@ -270,8 +273,8 @@ export default async function Home() {
           </div>
           <div className="flex flex-col items-center justify-center border-rule sm:border-l sm:pl-12">
             <div className="text-[11px] uppercase tracking-[0.4em] text-soft">{PLANS.basico.name}</div>
-            <div className="mt-1 font-serif text-7xl">{PLANS.basico.label}</div>
-            <div className="text-sm text-soft">pago único, sin suscripción</div>
+            <div className="mt-1 font-serif text-7xl leading-none" style={LINING}>{PLANS.basico.label}</div>
+            <div className="mt-3 text-sm text-soft">pago único, sin suscripción</div>
             <Link href="/crear" className="btn mt-6">
               Crear la mía
             </Link>
@@ -298,8 +301,8 @@ export default async function Home() {
             </ul>
           </div>
           <div className="text-center">
-            <div className="font-serif text-6xl">{PLANS.premium.label}</div>
-            <div className="text-sm text-soft">pago único</div>
+            <div className="font-serif text-6xl leading-none" style={LINING}>{PLANS.premium.label}</div>
+            <div className="mt-3 text-sm text-soft">pago único</div>
           </div>
         </div>
         <p className="mt-4 text-center text-sm text-soft">
