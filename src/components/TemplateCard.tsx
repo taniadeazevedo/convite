@@ -12,7 +12,7 @@ export default function TemplateCard({ t, href, names }: { t: Template; href?: s
     <div className="relative overflow-hidden rounded-2xl border border-rule bg-card transition-transform hover:-translate-y-1">
       <div className="h-[400px] overflow-hidden" inert>
         <div className="w-[200%] origin-top-left scale-50">
-          <Invitation template={t.id} data={data} mode="demo" embedded />
+          <Invitation template={t.id} data={data} mode="demo" embedded teaser />
         </div>
       </div>
       <div className="border-t border-rule p-3">

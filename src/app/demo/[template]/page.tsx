@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Invitation from "@/components/Invitation";
 import TrackSource from "@/components/TrackSource";
+import SiteFooter from "@/components/site/SiteFooter";
+import { DESIGN_INFO } from "@/lib/content/designs";
 import { trackVisit } from "@/lib/stats";
 import { BRAND, TEMPLATES, isTemplateId, sampleData } from "@/lib/templates";
 
@@ -19,7 +21,7 @@ export async function generateMetadata({ params }: Props) {
   if (!t) return {};
   return {
     title: `Invitación de boda digital «${t.name}» · ${BRAND}`,
-    description: `Diseño ${t.name}: ${t.tagline.toLowerCase()}. Vedla completa, como la recibiría un invitado.`,
+    description: `Diseño ${t.name}: ${t.tagline.toLowerCase()}. ${DESIGN_INFO[t.id]?.ideal ?? "Vedla completa, como la recibiría un invitado."}`.slice(0, 160),
     alternates: { canonical: `/demo/${t.id}` },
   };
 }
@@ -33,6 +35,8 @@ export default async function Demo({ params, searchParams }: Props) {
   if (n2) data.name2 = n2.slice(0, 40);
   if (!isTemplateId(template)) notFound();
   await trackVisit("demo");
+  const t = TEMPLATES.find((x) => x.id === template);
+  const info = DESIGN_INFO[template];
   return (
     <>
       <TrackSource />
@@ -49,6 +53,31 @@ export default async function Demo({ params, searchParams }: Props) {
         </Link>
       </div>
       <Invitation template={template} data={data} mode="demo" />
+      {/* Sobre este diseño: texto propio de cada demo y enlace a su página de estilo */}
+      {info && t && (
+        <section className="border-t border-rule bg-paper px-6 py-14">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-[11px] uppercase tracking-[0.4em] text-brand">Diseño {t.name}</p>
+            <h1 className="mt-3 font-serif text-4xl">Invitación de boda digital «{t.name}»</h1>
+            <p className="mt-4 text-lg text-soft">{info.detail}</p>
+            <p className="mt-3 text-soft">
+              <strong className="text-ink">Ideal para:</strong> {info.ideal}
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Link
+                href={`/crear?${new URLSearchParams({ plantilla: template, ...(n1 && { n1: n1.slice(0, 40) }), ...(n2 && { n2: n2.slice(0, 40) }) })}`}
+                className="btn"
+              >
+                Usar este diseño
+              </Link>
+              <Link href={`/${info.stylePage}`} className="btn-ghost">
+                Ver diseños parecidos
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+      <SiteFooter />
     </>
   );
 }

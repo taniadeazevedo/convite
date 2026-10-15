@@ -275,6 +275,78 @@ export const PRODUCT_PAGES: ProductPage[] = [
     ],
   },
   {
+    slug: "invitaciones-boda-romanticas",
+    title: "Invitaciones de boda románticas",
+    seoTitle: "Invitaciones de boda románticas digitales | Invitalia",
+    description:
+      "Invitaciones de boda románticas en digital: tonos pastel, retrato en óvalo y tipografía delicada. Con confirmación de asistencia. Probadlas con vuestros nombres.",
+    eyebrow: "Románticas",
+    intro:
+      "Flores, tonos suaves y una foto vuestra bien enmarcada. Si vuestra boda es de primavera, en un jardín o simplemente os gusta lo delicado, estos diseños transmiten justo eso desde el primer vistazo.",
+    featured: ["rosa", "lino", "salvia"],
+    blocks: [
+      { type: "h2", text: "Los diseños más románticos" },
+      {
+        type: "ul",
+        items: [
+          "Rosa: retrato en óvalo y rosa empolvado. El más romántico de todos.",
+          "Lino: foto en arco, tonos crema y nombres en cursiva.",
+          "Salvia: verde suave, fotos tipo polaroid y letra manuscrita.",
+        ],
+      },
+      { type: "h2", text: "Cómo hacer que la invitación sea aún más vuestra" },
+      {
+        type: "ul",
+        items: [
+          "Contad cómo os conocisteis en la sección «Nuestra historia», con una línea del tiempo por años.",
+          "Elegid para la portada una foto con luz natural y fondo sencillo: es la que más luce en estos diseños.",
+          "Un mensaje de bienvenida corto y personal funciona mejor que uno largo.",
+        ],
+      },
+      { type: "quote", text: "Después de tantos años juntos, por fin nos casamos. Nos haría muy felices que estuvieras ese día con nosotros." },
+      { type: "cta", text: "Probad los diseños románticos con vuestros nombres" },
+    ],
+    faq: [
+      ["¿Puedo poner más de una foto?", `Sí: una de portada y una galería de hasta ${PLANS.basico.photos} fotos (${PLANS.premium.photos} en Premium).`],
+      ["¿Se puede contar nuestra historia?", "Sí, hay una sección con texto y una línea del tiempo por años. Si no la queréis, se oculta."],
+    ],
+  },
+  {
+    slug: "invitaciones-boda-originales",
+    title: "Invitaciones de boda originales y divertidas",
+    seoTitle: "Invitaciones de boda originales y divertidas | Invitalia",
+    description:
+      "Invitaciones de boda originales en digital: colores vivos, collage de fotos o tarjeta de embarque. Para parejas que no quieren lo de siempre.",
+    eyebrow: "Originales",
+    intro:
+      "Si cuando pensáis en una invitación clásica os entra la risa, estos diseños son para vosotros. Colores, fotos superpuestas o una tarjeta de embarque: nadie va a confundir vuestra invitación con otra.",
+    featured: ["pop", "collage", "postal"],
+    blocks: [
+      { type: "h2", text: "Los diseños con más personalidad" },
+      {
+        type: "ul",
+        items: [
+          "Pop: tipografía enorme, colores vivos y pegatinas.",
+          "Collage: fotos como recortes superpuestos, notas y rojo intenso.",
+          "Postal: una tarjeta de embarque con vuestros nombres y la boda como destino.",
+        ],
+      },
+      { type: "h2", text: "Textos a juego" },
+      {
+        type: "p",
+        text: "Un diseño original pide un texto con gracia. Unas cuantas ideas para la portada:",
+      },
+      { type: "quote", text: "Hemos decidido aguantarnos para siempre y queremos testigos." },
+      { type: "quote", text: "Tenemos fecha, finca y menú. Solo nos faltas tú." },
+      { type: "quote", text: "Embarque inmediato: destino, nuestra boda. Puerta: la de la finca. Hora: las seis." },
+      { type: "cta", text: "Probad los diseños originales con vuestros nombres" },
+    ],
+    faq: [
+      ["¿Se puede cambiar el texto de ejemplo?", "Todo el texto lo escribís vosotros: los ejemplos solo están para que veáis cómo queda."],
+      ["¿Funciona igual de bien en el móvil?", "Sí, los diez diseños están pensados primero para el móvil, que es donde los abrirán casi todos vuestros invitados."],
+    ],
+  },
+  {
     slug: "album-fotos-boda-qr",
     title: "Álbum de fotos de boda con código QR",
     seoTitle: "Álbum de fotos de boda con código QR para invitados | Invitalia",

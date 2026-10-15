@@ -28,6 +28,9 @@ type Props = {
   branding?: boolean;
   // La boda ya pasó: se quita lo que solo sirve antes (confirmar asistencia, horarios, alojamiento…)
   afterWedding?: boolean;
+  // Miniatura: solo la portada y el primer bloque, que es lo único que se ve en las tarjetas de diseños.
+  // Pintar la invitación entera en cada miniatura hacía la página de inicio muy pesada en el móvil.
+  teaser?: boolean;
 };
 
 const label = "text-[11px] uppercase tracking-[0.4em]";
@@ -375,7 +378,7 @@ function RsvpForm({ t, data, mode, slug }: { t: Template; data: InvitationData; 
   );
 }
 
-export default function Invitation({ template, data, mode, slug, embedded, branding = true, afterWedding = false }: Props) {
+export default function Invitation({ template, data, mode, slug, embedded, branding = true, afterWedding = false, teaser = false }: Props) {
   const t = getTemplate(template);
   const name1 = data.name1 || "Nombre";
   const name2 = data.name2 || "Nombre";
@@ -425,6 +428,8 @@ export default function Invitation({ template, data, mode, slug, embedded, brand
           </section>
         )}
 
+        {!teaser && (
+          <>
         {on("story") && (data.story || data.milestones.length > 0) && (
           <Section eyebrow="Cómo empezó todo" title="Nuestra historia" t={t} off={embedded}>
             {data.story && <p className={`max-w-md whitespace-pre-line leading-relaxed ${block}`}>{data.story}</p>}
@@ -571,6 +576,8 @@ export default function Invitation({ template, data, mode, slug, embedded, brand
             </p>
           )}
         </footer>
+          </>
+        )}
       </div>
     </div>
   );
