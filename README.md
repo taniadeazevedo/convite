@@ -42,7 +42,7 @@ La web guarda los datos en un archivo SQLite y las fotos en disco, así que nece
 
 Railway publica solo cada cambio que llega a la rama `main`, siempre que la app **Railway App** esté *instalada* en GitHub con acceso a este repositorio (github.com/settings/installations). Si deja de desplegar, revisa eso primero.
 
-Para saber qué versión está publicada: `https://www.invitalia.es/api/salud`.
+Para saber qué versión está publicada: `https://www.invitalia.es/api/salud`. Debe coincidir con el último cambio de `main` (`git log -1`).
 
 ## Correos (Resend)
 
